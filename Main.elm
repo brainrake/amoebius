@@ -111,7 +111,8 @@ update msg model = case msg of
   Select s -> { model | selection = s }
   Play (x, y) ->
     { model
-    | board = model.board |> set (x, y) (Just model.side)
+    | selection = Nothing
+    , board = model.board |> set (x, y) (Just model.side)
     , side = model.side |> other
     }
 
