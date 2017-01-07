@@ -8,10 +8,16 @@ import Matrix exposing (..)
 import Maybe.Extra exposing (maybeToList)
 
 type Side = Black | White
+
 other : Side -> Side
 other side = case side of
   Black -> White
   White -> Black
+
+colorOf : Side -> Color
+colorOf side = case side of
+  Black -> black
+  White -> white
 
 type alias Cell = Maybe Side
 
@@ -36,8 +42,8 @@ board_pixels : number
 board_pixels = slot_pixels * board_size
 
 
-view_isxn : Bool -> Html Msg
-view_isxn selected =
+view_isxn : Bool -> Side -> Html Msg
+view_isxn selected side =
   let
     end = slot_pixels
     mid = slot_pixels / 2
@@ -48,7 +54,7 @@ view_isxn selected =
       |> List.map (uncurry segment)
       |> List.map (solidLine 1 (solid black))
     dot = circle (mid)
-          |> (filled (solid black))
+          |> (filled (solid (colorOf side)))
           |> position (mid, mid)
   in svg 0 0 end end <|
     group (cross ++ if selected then [ dot ] else [])
@@ -72,7 +78,7 @@ view_board model =
               ++ maybeToList (hover x y model |> Maybe.map onMouseEnter)
               ++ maybeToList (click x y model |> Maybe.map Html.Events.onMouseDown)
             )
-            [ view_isxn (model.selection == Just (x, y)) ]))))
+            [ view_isxn (model.selection == Just (x, y)) model.side ]))))
 
 
 hover : Int -> Int -> Model -> Maybe Msg
