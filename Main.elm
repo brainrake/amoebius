@@ -5,7 +5,7 @@ import Html.Events exposing (onMouseEnter, onMouseLeave, onMouseDown)
 import Color exposing (..)
 import List exposing (range, map, concatMap)
 import Matrix exposing (..)
-import Maybe.Extra exposing (maybeToList)
+import Maybe.Extra exposing (maybeToList, join)
 
 type Side = Black | White
 
@@ -42,8 +42,8 @@ board_pixels : number
 board_pixels = slot_pixels * board_size
 
 
-view_isxn : Bool -> Side -> Html Msg
-view_isxn selected side =
+view_isxn : Bool -> Side -> Cell -> Html Msg
+view_isxn selected sideToPlay cell =
   let
     end = slot_pixels
     mid = slot_pixels / 2
@@ -53,11 +53,15 @@ view_isxn selected side =
       ]
       |> List.map (uncurry segment)
       |> List.map (solidLine 1 (solid black))
-    dot = circle (mid)
-          |> (filled (solid (colorOf side)))
+    dot color = circle (mid)
+          |> (filled (solid (color)))
           |> position (mid, mid)
   in svg 0 0 end end <|
-    group (cross ++ if selected then [ dot ] else [])
+    group (
+      cross
+      ++ if selected then [ dot (colorOf sideToPlay) ] else []
+      ++ maybeToList (cell |> Maybe.map colorOf |> Maybe.map dot)
+    )
 
 
 view_board : Model -> Html Msg
@@ -78,7 +82,10 @@ view_board model =
               ++ maybeToList (hover x y model |> Maybe.map onMouseEnter)
               ++ maybeToList (click x y model |> Maybe.map Html.Events.onMouseDown)
             )
-            [ view_isxn (model.selection == Just (x, y)) model.side ]))))
+            [ view_isxn
+                (model.selection == Just (x, y))
+                model.side
+                (model.board |> get (x, y) |> join) ]))))
 
 
 hover : Int -> Int -> Model -> Maybe Msg
