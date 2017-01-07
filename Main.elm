@@ -1,20 +1,29 @@
 import Graphics.Render exposing (..)
 import Html exposing (Html, div, span)
 import Html.Attributes exposing (style)
-import Html.Events exposing (onMouseEnter, onMouseLeave)
+import Html.Events exposing (onMouseEnter, onMouseLeave, onMouseDown)
 import Color exposing (..)
 import List exposing (range, map, concatMap)
 import Matrix exposing (..)
+import Maybe.Extra exposing (maybeToList)
 
-type Cell = Black | White | Empty
+type Side = Black | White
+other : Side -> Side
+other side = case side of
+  Black -> White
+  White -> Black
+
+type alias Cell = Maybe Side
 
 type alias Model =
   { selection : Maybe (Int, Int)
   , board : Matrix Cell
+  , side: Side
   }
 
 type Msg =
-    Hover (Maybe (Int, Int))
+    Select (Maybe (Int, Int))
+  | Play (Int, Int)
 
 
 slot_pixels : number
@@ -48,20 +57,35 @@ view_isxn selected =
 view_board : Model -> Html Msg
 view_board model =
   div
-    [ onMouseLeave (Hover Nothing)
+    [ onMouseLeave (Select Nothing)
     , style
       [ ("line-height", "0")
       , ("width", toString board_pixels ++ "px")
       , ("background-color", "rgb(253, 226, 119)")]
     ]
-    (range 1 board_size |> List.map (λx ->
+    (range 0 (board_size - 1) |> List.map (λx ->
       div []
-        (range 1 board_size |> List.map (λy ->
+        (range 0 (board_size - 1) |> List.map (λy ->
           div
-            [ onMouseEnter (Hover (Just (x, y)))
-            , style [ ("display", "inline-block") ]
-            ]
+            (
+              [ style [ ("display", "inline-block") ] ]
+              ++ maybeToList (hover x y model |> Maybe.map onMouseEnter)
+              ++ maybeToList (click x y model |> Maybe.map Html.Events.onMouseDown)
+            )
             [ view_isxn (model.selection == Just (x, y)) ]))))
+
+
+hover : Int -> Int -> Model -> Maybe Msg
+hover x y model = case model.board |> get (x, y) of
+  Just Nothing -> Just <| Select <| Just (x, y)
+  _ -> model.selection |> (Maybe.map <| always <| Select Nothing)
+
+
+click : Int -> Int -> { b | board : Matrix (Maybe a) } -> Maybe Msg
+click x y model = case model.board |> get (x, y) of
+  Just Nothing -> Just <| Play (x, y)
+  _ -> Nothing
+
 
 view : Model -> Html Msg
 view model =
@@ -71,12 +95,17 @@ view model =
 
 update : Msg -> Model -> Model
 update msg model = case msg of
-  Hover h -> { model | selection = h }
+  Select s -> { model | selection = s }
+  Play (x, y) ->
+    { model
+    | board = model.board |> set (x, y) (Just model.side)
+    , side = model.side |> other
+    }
 
 
 main : Program Never Model Msg
 main = Html.beginnerProgram
-  { model = { selection = Nothing, board = Matrix.square board_size (always Empty) }
+  { model = { selection = Nothing, board = Matrix.square board_size (always Nothing), side = Black }
   , view = view
   , update = update
   }
