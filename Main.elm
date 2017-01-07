@@ -36,7 +36,7 @@ slot_pixels : number
 slot_pixels = 20
 
 board_size : number
-board_size = 15
+board_size = 6
 
 board_pixels : number
 board_pixels = slot_pixels * board_size
@@ -69,9 +69,9 @@ view_board model =
   div
     [ onMouseLeave (Select Nothing)
     , style
-      [ ("line-height", "0")
-      , ("width", toString board_pixels ++ "px")
-      , ("background-color", "rgb(253, 226, 119)")]
+      [ ("background-color", "rgb(253, 226, 119)")
+      , ("display", "inline-block")
+      ]
     ]
     (range 0 (board_size - 1) |> List.map (λx ->
       div []
@@ -102,8 +102,22 @@ click x y model = case model.board |> get (x, y) of
 
 view : Model -> Html Msg
 view model =
-  view_board model
-  -- div [] [ view_board , view_board, view_board ]
+  let board_html = view_board model
+  in div
+      [ style
+        [ ("width", toString (board_pixels * 3) ++ "px")
+        , ("line-height", "0")
+        ]
+      ]
+      ([ flipY >> flipX, flipX, flipY >> flipX
+      , flipY, identity, flipY
+      , flipY >> flipX, flipX, flipY >> flipX
+      ] |> List.map ((|>) board_html))
+
+flipX : Html msg -> Html msg
+flipX html = div [ style [ ("transform", "scaleX(-1)"), ("display", "inline-block") ] ] [ html ]
+flipY : Html msg -> Html msg
+flipY html = div [ style [ ("transform", "scaleY(-1)"), ("display", "inline-block") ] ] [ html ]
 
 
 update : Msg -> Model -> Model
