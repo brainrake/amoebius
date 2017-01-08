@@ -14,3 +14,10 @@ type alias Model =
 type Msg =
     Select (Maybe Coord)
   | Move Coord
+  | Clear
+  | Fill
+  | RandomMoves Coord
+  | Randomize
+  | RandomLattice Lattice
+  | SetLattice Lattice
+  | SetSize Int

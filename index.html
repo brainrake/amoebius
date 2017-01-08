@@ -9814,133 +9814,2117 @@ var _Kwarrtz$render$Graphics_Render$image = F3(
 		return _Kwarrtz$render$Graphics_Render$form(
 			A3(_Kwarrtz$render$Graphics_Render_Core$FImage, url, w, h));
 	});
-var _chendrix$elm_matrix$Matrix$rowCount = function (m) {
-	return _elm_lang$core$Array$length(m);
-};
-var _chendrix$elm_matrix$Matrix$colCount = function (m) {
-	return A2(
-		_elm_lang$core$Maybe$withDefault,
-		0,
-		A2(
-			_elm_lang$core$Maybe$map,
-			_elm_lang$core$Array$length,
-			A2(_elm_lang$core$Array$get, 0, m)));
-};
-var _chendrix$elm_matrix$Matrix$fromList = function (l) {
-	return _elm_lang$core$Array$fromList(
-		A2(_elm_lang$core$List$map, _elm_lang$core$Array$fromList, l));
-};
-var _chendrix$elm_matrix$Matrix$toList = function (m) {
-	return _elm_lang$core$Array$toList(
-		A2(_elm_lang$core$Array$map, _elm_lang$core$Array$toList, m));
-};
-var _chendrix$elm_matrix$Matrix$flatten = function (m) {
-	return _elm_lang$core$List$concat(
-		_chendrix$elm_matrix$Matrix$toList(m));
-};
-var _chendrix$elm_matrix$Matrix$map = F2(
-	function (f, m) {
-		return A2(
-			_elm_lang$core$Array$map,
-			_elm_lang$core$Array$map(f),
-			m);
-	});
-var _chendrix$elm_matrix$Matrix$col = _elm_lang$core$Tuple$second;
-var _chendrix$elm_matrix$Matrix$row = _elm_lang$core$Tuple$first;
-var _chendrix$elm_matrix$Matrix$get = F2(
-	function (location, m) {
-		return A2(
-			_elm_lang$core$Maybe$andThen,
-			_elm_lang$core$Array$get(
-				_chendrix$elm_matrix$Matrix$col(location)),
+var _elm_lang$core$Task$onError = _elm_lang$core$Native_Scheduler.onError;
+var _elm_lang$core$Task$andThen = _elm_lang$core$Native_Scheduler.andThen;
+var _elm_lang$core$Task$spawnCmd = F2(
+	function (router, _p0) {
+		var _p1 = _p0;
+		return _elm_lang$core$Native_Scheduler.spawn(
 			A2(
-				_elm_lang$core$Array$get,
-				_chendrix$elm_matrix$Matrix$row(location),
-				m));
+				_elm_lang$core$Task$andThen,
+				_elm_lang$core$Platform$sendToApp(router),
+				_p1._0));
 	});
-var _chendrix$elm_matrix$Matrix$update = F3(
-	function (location, f, m) {
+var _elm_lang$core$Task$fail = _elm_lang$core$Native_Scheduler.fail;
+var _elm_lang$core$Task$mapError = F2(
+	function (convert, task) {
 		return A2(
-			_elm_lang$core$Maybe$withDefault,
-			m,
-			A2(
-				_elm_lang$core$Maybe$map,
-				function (current) {
-					return A2(
-						_elm_lang$core$Maybe$withDefault,
-						m,
-						A2(
-							_elm_lang$core$Maybe$map,
-							function (oldRow) {
-								return function (newRow) {
-									return A3(
-										_elm_lang$core$Array$set,
-										_chendrix$elm_matrix$Matrix$row(location),
-										newRow,
-										m);
-								}(
-									A3(
-										_elm_lang$core$Array$set,
-										_chendrix$elm_matrix$Matrix$col(location),
-										f(current),
-										oldRow));
-							},
-							A2(
-								_elm_lang$core$Array$get,
-								_chendrix$elm_matrix$Matrix$row(location),
-								m)));
-				},
-				A2(_chendrix$elm_matrix$Matrix$get, location, m)));
+			_elm_lang$core$Task$onError,
+			function (_p2) {
+				return _elm_lang$core$Task$fail(
+					convert(_p2));
+			},
+			task);
 	});
-var _chendrix$elm_matrix$Matrix$set = F3(
-	function (location, value, m) {
-		return A3(
-			_chendrix$elm_matrix$Matrix$update,
-			location,
-			_elm_lang$core$Basics$always(value),
-			m);
-	});
-var _chendrix$elm_matrix$Matrix$loc = F2(
-	function (v0, v1) {
-		return {ctor: '_Tuple2', _0: v0, _1: v1};
-	});
-var _chendrix$elm_matrix$Matrix$matrix = F3(
-	function (numRows, numCols, f) {
+var _elm_lang$core$Task$succeed = _elm_lang$core$Native_Scheduler.succeed;
+var _elm_lang$core$Task$map = F2(
+	function (func, taskA) {
 		return A2(
-			_elm_lang$core$Array$initialize,
-			numRows,
-			function (row) {
+			_elm_lang$core$Task$andThen,
+			function (a) {
+				return _elm_lang$core$Task$succeed(
+					func(a));
+			},
+			taskA);
+	});
+var _elm_lang$core$Task$map2 = F3(
+	function (func, taskA, taskB) {
+		return A2(
+			_elm_lang$core$Task$andThen,
+			function (a) {
 				return A2(
-					_elm_lang$core$Array$initialize,
-					numCols,
-					function (col) {
-						return f(
-							A2(_chendrix$elm_matrix$Matrix$loc, row, col));
-					});
+					_elm_lang$core$Task$andThen,
+					function (b) {
+						return _elm_lang$core$Task$succeed(
+							A2(func, a, b));
+					},
+					taskB);
+			},
+			taskA);
+	});
+var _elm_lang$core$Task$map3 = F4(
+	function (func, taskA, taskB, taskC) {
+		return A2(
+			_elm_lang$core$Task$andThen,
+			function (a) {
+				return A2(
+					_elm_lang$core$Task$andThen,
+					function (b) {
+						return A2(
+							_elm_lang$core$Task$andThen,
+							function (c) {
+								return _elm_lang$core$Task$succeed(
+									A3(func, a, b, c));
+							},
+							taskC);
+					},
+					taskB);
+			},
+			taskA);
+	});
+var _elm_lang$core$Task$map4 = F5(
+	function (func, taskA, taskB, taskC, taskD) {
+		return A2(
+			_elm_lang$core$Task$andThen,
+			function (a) {
+				return A2(
+					_elm_lang$core$Task$andThen,
+					function (b) {
+						return A2(
+							_elm_lang$core$Task$andThen,
+							function (c) {
+								return A2(
+									_elm_lang$core$Task$andThen,
+									function (d) {
+										return _elm_lang$core$Task$succeed(
+											A4(func, a, b, c, d));
+									},
+									taskD);
+							},
+							taskC);
+					},
+					taskB);
+			},
+			taskA);
+	});
+var _elm_lang$core$Task$map5 = F6(
+	function (func, taskA, taskB, taskC, taskD, taskE) {
+		return A2(
+			_elm_lang$core$Task$andThen,
+			function (a) {
+				return A2(
+					_elm_lang$core$Task$andThen,
+					function (b) {
+						return A2(
+							_elm_lang$core$Task$andThen,
+							function (c) {
+								return A2(
+									_elm_lang$core$Task$andThen,
+									function (d) {
+										return A2(
+											_elm_lang$core$Task$andThen,
+											function (e) {
+												return _elm_lang$core$Task$succeed(
+													A5(func, a, b, c, d, e));
+											},
+											taskE);
+									},
+									taskD);
+							},
+							taskC);
+					},
+					taskB);
+			},
+			taskA);
+	});
+var _elm_lang$core$Task$sequence = function (tasks) {
+	var _p3 = tasks;
+	if (_p3.ctor === '[]') {
+		return _elm_lang$core$Task$succeed(
+			{ctor: '[]'});
+	} else {
+		return A3(
+			_elm_lang$core$Task$map2,
+			F2(
+				function (x, y) {
+					return {ctor: '::', _0: x, _1: y};
+				}),
+			_p3._0,
+			_elm_lang$core$Task$sequence(_p3._1));
+	}
+};
+var _elm_lang$core$Task$onEffects = F3(
+	function (router, commands, state) {
+		return A2(
+			_elm_lang$core$Task$map,
+			function (_p4) {
+				return {ctor: '_Tuple0'};
+			},
+			_elm_lang$core$Task$sequence(
+				A2(
+					_elm_lang$core$List$map,
+					_elm_lang$core$Task$spawnCmd(router),
+					commands)));
+	});
+var _elm_lang$core$Task$init = _elm_lang$core$Task$succeed(
+	{ctor: '_Tuple0'});
+var _elm_lang$core$Task$onSelfMsg = F3(
+	function (_p7, _p6, _p5) {
+		return _elm_lang$core$Task$succeed(
+			{ctor: '_Tuple0'});
+	});
+var _elm_lang$core$Task$command = _elm_lang$core$Native_Platform.leaf('Task');
+var _elm_lang$core$Task$Perform = function (a) {
+	return {ctor: 'Perform', _0: a};
+};
+var _elm_lang$core$Task$perform = F2(
+	function (toMessage, task) {
+		return _elm_lang$core$Task$command(
+			_elm_lang$core$Task$Perform(
+				A2(_elm_lang$core$Task$map, toMessage, task)));
+	});
+var _elm_lang$core$Task$attempt = F2(
+	function (resultToMessage, task) {
+		return _elm_lang$core$Task$command(
+			_elm_lang$core$Task$Perform(
+				A2(
+					_elm_lang$core$Task$onError,
+					function (_p8) {
+						return _elm_lang$core$Task$succeed(
+							resultToMessage(
+								_elm_lang$core$Result$Err(_p8)));
+					},
+					A2(
+						_elm_lang$core$Task$andThen,
+						function (_p9) {
+							return _elm_lang$core$Task$succeed(
+								resultToMessage(
+									_elm_lang$core$Result$Ok(_p9)));
+						},
+						task))));
+	});
+var _elm_lang$core$Task$cmdMap = F2(
+	function (tagger, _p10) {
+		var _p11 = _p10;
+		return _elm_lang$core$Task$Perform(
+			A2(_elm_lang$core$Task$map, tagger, _p11._0));
+	});
+_elm_lang$core$Native_Platform.effectManagers['Task'] = {pkg: 'elm-lang/core', init: _elm_lang$core$Task$init, onEffects: _elm_lang$core$Task$onEffects, onSelfMsg: _elm_lang$core$Task$onSelfMsg, tag: 'cmd', cmdMap: _elm_lang$core$Task$cmdMap};
+//import Native.Scheduler //
+
+var _elm_lang$core$Native_Time = function() {
+
+var now = _elm_lang$core$Native_Scheduler.nativeBinding(function(callback)
+{
+	callback(_elm_lang$core$Native_Scheduler.succeed(Date.now()));
+});
+
+function setInterval_(interval, task)
+{
+	return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback)
+	{
+		var id = setInterval(function() {
+			_elm_lang$core$Native_Scheduler.rawSpawn(task);
+		}, interval);
+
+		return function() { clearInterval(id); };
+	});
+}
+
+return {
+	now: now,
+	setInterval_: F2(setInterval_)
+};
+
+}();var _elm_lang$core$Time$setInterval = _elm_lang$core$Native_Time.setInterval_;
+var _elm_lang$core$Time$spawnHelp = F3(
+	function (router, intervals, processes) {
+		var _p0 = intervals;
+		if (_p0.ctor === '[]') {
+			return _elm_lang$core$Task$succeed(processes);
+		} else {
+			var _p1 = _p0._0;
+			var spawnRest = function (id) {
+				return A3(
+					_elm_lang$core$Time$spawnHelp,
+					router,
+					_p0._1,
+					A3(_elm_lang$core$Dict$insert, _p1, id, processes));
+			};
+			var spawnTimer = _elm_lang$core$Native_Scheduler.spawn(
+				A2(
+					_elm_lang$core$Time$setInterval,
+					_p1,
+					A2(_elm_lang$core$Platform$sendToSelf, router, _p1)));
+			return A2(_elm_lang$core$Task$andThen, spawnRest, spawnTimer);
+		}
+	});
+var _elm_lang$core$Time$addMySub = F2(
+	function (_p2, state) {
+		var _p3 = _p2;
+		var _p6 = _p3._1;
+		var _p5 = _p3._0;
+		var _p4 = A2(_elm_lang$core$Dict$get, _p5, state);
+		if (_p4.ctor === 'Nothing') {
+			return A3(
+				_elm_lang$core$Dict$insert,
+				_p5,
+				{
+					ctor: '::',
+					_0: _p6,
+					_1: {ctor: '[]'}
+				},
+				state);
+		} else {
+			return A3(
+				_elm_lang$core$Dict$insert,
+				_p5,
+				{ctor: '::', _0: _p6, _1: _p4._0},
+				state);
+		}
+	});
+var _elm_lang$core$Time$inMilliseconds = function (t) {
+	return t;
+};
+var _elm_lang$core$Time$millisecond = 1;
+var _elm_lang$core$Time$second = 1000 * _elm_lang$core$Time$millisecond;
+var _elm_lang$core$Time$minute = 60 * _elm_lang$core$Time$second;
+var _elm_lang$core$Time$hour = 60 * _elm_lang$core$Time$minute;
+var _elm_lang$core$Time$inHours = function (t) {
+	return t / _elm_lang$core$Time$hour;
+};
+var _elm_lang$core$Time$inMinutes = function (t) {
+	return t / _elm_lang$core$Time$minute;
+};
+var _elm_lang$core$Time$inSeconds = function (t) {
+	return t / _elm_lang$core$Time$second;
+};
+var _elm_lang$core$Time$now = _elm_lang$core$Native_Time.now;
+var _elm_lang$core$Time$onSelfMsg = F3(
+	function (router, interval, state) {
+		var _p7 = A2(_elm_lang$core$Dict$get, interval, state.taggers);
+		if (_p7.ctor === 'Nothing') {
+			return _elm_lang$core$Task$succeed(state);
+		} else {
+			var tellTaggers = function (time) {
+				return _elm_lang$core$Task$sequence(
+					A2(
+						_elm_lang$core$List$map,
+						function (tagger) {
+							return A2(
+								_elm_lang$core$Platform$sendToApp,
+								router,
+								tagger(time));
+						},
+						_p7._0));
+			};
+			return A2(
+				_elm_lang$core$Task$andThen,
+				function (_p8) {
+					return _elm_lang$core$Task$succeed(state);
+				},
+				A2(_elm_lang$core$Task$andThen, tellTaggers, _elm_lang$core$Time$now));
+		}
+	});
+var _elm_lang$core$Time$subscription = _elm_lang$core$Native_Platform.leaf('Time');
+var _elm_lang$core$Time$State = F2(
+	function (a, b) {
+		return {taggers: a, processes: b};
+	});
+var _elm_lang$core$Time$init = _elm_lang$core$Task$succeed(
+	A2(_elm_lang$core$Time$State, _elm_lang$core$Dict$empty, _elm_lang$core$Dict$empty));
+var _elm_lang$core$Time$onEffects = F3(
+	function (router, subs, _p9) {
+		var _p10 = _p9;
+		var rightStep = F3(
+			function (_p12, id, _p11) {
+				var _p13 = _p11;
+				return {
+					ctor: '_Tuple3',
+					_0: _p13._0,
+					_1: _p13._1,
+					_2: A2(
+						_elm_lang$core$Task$andThen,
+						function (_p14) {
+							return _p13._2;
+						},
+						_elm_lang$core$Native_Scheduler.kill(id))
+				};
+			});
+		var bothStep = F4(
+			function (interval, taggers, id, _p15) {
+				var _p16 = _p15;
+				return {
+					ctor: '_Tuple3',
+					_0: _p16._0,
+					_1: A3(_elm_lang$core$Dict$insert, interval, id, _p16._1),
+					_2: _p16._2
+				};
+			});
+		var leftStep = F3(
+			function (interval, taggers, _p17) {
+				var _p18 = _p17;
+				return {
+					ctor: '_Tuple3',
+					_0: {ctor: '::', _0: interval, _1: _p18._0},
+					_1: _p18._1,
+					_2: _p18._2
+				};
+			});
+		var newTaggers = A3(_elm_lang$core$List$foldl, _elm_lang$core$Time$addMySub, _elm_lang$core$Dict$empty, subs);
+		var _p19 = A6(
+			_elm_lang$core$Dict$merge,
+			leftStep,
+			bothStep,
+			rightStep,
+			newTaggers,
+			_p10.processes,
+			{
+				ctor: '_Tuple3',
+				_0: {ctor: '[]'},
+				_1: _elm_lang$core$Dict$empty,
+				_2: _elm_lang$core$Task$succeed(
+					{ctor: '_Tuple0'})
+			});
+		var spawnList = _p19._0;
+		var existingDict = _p19._1;
+		var killTask = _p19._2;
+		return A2(
+			_elm_lang$core$Task$andThen,
+			function (newProcesses) {
+				return _elm_lang$core$Task$succeed(
+					A2(_elm_lang$core$Time$State, newTaggers, newProcesses));
+			},
+			A2(
+				_elm_lang$core$Task$andThen,
+				function (_p20) {
+					return A3(_elm_lang$core$Time$spawnHelp, router, spawnList, existingDict);
+				},
+				killTask));
+	});
+var _elm_lang$core$Time$Every = F2(
+	function (a, b) {
+		return {ctor: 'Every', _0: a, _1: b};
+	});
+var _elm_lang$core$Time$every = F2(
+	function (interval, tagger) {
+		return _elm_lang$core$Time$subscription(
+			A2(_elm_lang$core$Time$Every, interval, tagger));
+	});
+var _elm_lang$core$Time$subMap = F2(
+	function (f, _p21) {
+		var _p22 = _p21;
+		return A2(
+			_elm_lang$core$Time$Every,
+			_p22._0,
+			function (_p23) {
+				return f(
+					_p22._1(_p23));
 			});
 	});
-var _chendrix$elm_matrix$Matrix$square = function (size) {
-	return A2(_chendrix$elm_matrix$Matrix$matrix, size, size);
-};
-var _chendrix$elm_matrix$Matrix$mapWithLocation = F2(
-	function (f, m) {
-		return A2(
-			_elm_lang$core$Array$indexedMap,
-			F2(
-				function (rowNum, row) {
-					return A2(
-						_elm_lang$core$Array$indexedMap,
-						F2(
-							function (colNum, element) {
-								return A2(
-									f,
-									A2(_chendrix$elm_matrix$Matrix$loc, rowNum, colNum),
-									element);
-							}),
-						row);
-				}),
-			m);
+_elm_lang$core$Native_Platform.effectManagers['Time'] = {pkg: 'elm-lang/core', init: _elm_lang$core$Time$init, onEffects: _elm_lang$core$Time$onEffects, onSelfMsg: _elm_lang$core$Time$onSelfMsg, tag: 'sub', subMap: _elm_lang$core$Time$subMap};
+var _elm_lang$core$Random$onSelfMsg = F3(
+	function (_p1, _p0, seed) {
+		return _elm_lang$core$Task$succeed(seed);
 	});
+var _elm_lang$core$Random$magicNum8 = 2147483562;
+var _elm_lang$core$Random$range = function (_p2) {
+	return {ctor: '_Tuple2', _0: 0, _1: _elm_lang$core$Random$magicNum8};
+};
+var _elm_lang$core$Random$magicNum7 = 2147483399;
+var _elm_lang$core$Random$magicNum6 = 2147483563;
+var _elm_lang$core$Random$magicNum5 = 3791;
+var _elm_lang$core$Random$magicNum4 = 40692;
+var _elm_lang$core$Random$magicNum3 = 52774;
+var _elm_lang$core$Random$magicNum2 = 12211;
+var _elm_lang$core$Random$magicNum1 = 53668;
+var _elm_lang$core$Random$magicNum0 = 40014;
+var _elm_lang$core$Random$step = F2(
+	function (_p3, seed) {
+		var _p4 = _p3;
+		return _p4._0(seed);
+	});
+var _elm_lang$core$Random$onEffects = F3(
+	function (router, commands, seed) {
+		var _p5 = commands;
+		if (_p5.ctor === '[]') {
+			return _elm_lang$core$Task$succeed(seed);
+		} else {
+			var _p6 = A2(_elm_lang$core$Random$step, _p5._0._0, seed);
+			var value = _p6._0;
+			var newSeed = _p6._1;
+			return A2(
+				_elm_lang$core$Task$andThen,
+				function (_p7) {
+					return A3(_elm_lang$core$Random$onEffects, router, _p5._1, newSeed);
+				},
+				A2(_elm_lang$core$Platform$sendToApp, router, value));
+		}
+	});
+var _elm_lang$core$Random$listHelp = F4(
+	function (list, n, generate, seed) {
+		listHelp:
+		while (true) {
+			if (_elm_lang$core$Native_Utils.cmp(n, 1) < 0) {
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$List$reverse(list),
+					_1: seed
+				};
+			} else {
+				var _p8 = generate(seed);
+				var value = _p8._0;
+				var newSeed = _p8._1;
+				var _v2 = {ctor: '::', _0: value, _1: list},
+					_v3 = n - 1,
+					_v4 = generate,
+					_v5 = newSeed;
+				list = _v2;
+				n = _v3;
+				generate = _v4;
+				seed = _v5;
+				continue listHelp;
+			}
+		}
+	});
+var _elm_lang$core$Random$minInt = -2147483648;
+var _elm_lang$core$Random$maxInt = 2147483647;
+var _elm_lang$core$Random$iLogBase = F2(
+	function (b, i) {
+		return (_elm_lang$core$Native_Utils.cmp(i, b) < 0) ? 1 : (1 + A2(_elm_lang$core$Random$iLogBase, b, (i / b) | 0));
+	});
+var _elm_lang$core$Random$command = _elm_lang$core$Native_Platform.leaf('Random');
+var _elm_lang$core$Random$Generator = function (a) {
+	return {ctor: 'Generator', _0: a};
+};
+var _elm_lang$core$Random$list = F2(
+	function (n, _p9) {
+		var _p10 = _p9;
+		return _elm_lang$core$Random$Generator(
+			function (seed) {
+				return A4(
+					_elm_lang$core$Random$listHelp,
+					{ctor: '[]'},
+					n,
+					_p10._0,
+					seed);
+			});
+	});
+var _elm_lang$core$Random$map = F2(
+	function (func, _p11) {
+		var _p12 = _p11;
+		return _elm_lang$core$Random$Generator(
+			function (seed0) {
+				var _p13 = _p12._0(seed0);
+				var a = _p13._0;
+				var seed1 = _p13._1;
+				return {
+					ctor: '_Tuple2',
+					_0: func(a),
+					_1: seed1
+				};
+			});
+	});
+var _elm_lang$core$Random$map2 = F3(
+	function (func, _p15, _p14) {
+		var _p16 = _p15;
+		var _p17 = _p14;
+		return _elm_lang$core$Random$Generator(
+			function (seed0) {
+				var _p18 = _p16._0(seed0);
+				var a = _p18._0;
+				var seed1 = _p18._1;
+				var _p19 = _p17._0(seed1);
+				var b = _p19._0;
+				var seed2 = _p19._1;
+				return {
+					ctor: '_Tuple2',
+					_0: A2(func, a, b),
+					_1: seed2
+				};
+			});
+	});
+var _elm_lang$core$Random$pair = F2(
+	function (genA, genB) {
+		return A3(
+			_elm_lang$core$Random$map2,
+			F2(
+				function (v0, v1) {
+					return {ctor: '_Tuple2', _0: v0, _1: v1};
+				}),
+			genA,
+			genB);
+	});
+var _elm_lang$core$Random$map3 = F4(
+	function (func, _p22, _p21, _p20) {
+		var _p23 = _p22;
+		var _p24 = _p21;
+		var _p25 = _p20;
+		return _elm_lang$core$Random$Generator(
+			function (seed0) {
+				var _p26 = _p23._0(seed0);
+				var a = _p26._0;
+				var seed1 = _p26._1;
+				var _p27 = _p24._0(seed1);
+				var b = _p27._0;
+				var seed2 = _p27._1;
+				var _p28 = _p25._0(seed2);
+				var c = _p28._0;
+				var seed3 = _p28._1;
+				return {
+					ctor: '_Tuple2',
+					_0: A3(func, a, b, c),
+					_1: seed3
+				};
+			});
+	});
+var _elm_lang$core$Random$map4 = F5(
+	function (func, _p32, _p31, _p30, _p29) {
+		var _p33 = _p32;
+		var _p34 = _p31;
+		var _p35 = _p30;
+		var _p36 = _p29;
+		return _elm_lang$core$Random$Generator(
+			function (seed0) {
+				var _p37 = _p33._0(seed0);
+				var a = _p37._0;
+				var seed1 = _p37._1;
+				var _p38 = _p34._0(seed1);
+				var b = _p38._0;
+				var seed2 = _p38._1;
+				var _p39 = _p35._0(seed2);
+				var c = _p39._0;
+				var seed3 = _p39._1;
+				var _p40 = _p36._0(seed3);
+				var d = _p40._0;
+				var seed4 = _p40._1;
+				return {
+					ctor: '_Tuple2',
+					_0: A4(func, a, b, c, d),
+					_1: seed4
+				};
+			});
+	});
+var _elm_lang$core$Random$map5 = F6(
+	function (func, _p45, _p44, _p43, _p42, _p41) {
+		var _p46 = _p45;
+		var _p47 = _p44;
+		var _p48 = _p43;
+		var _p49 = _p42;
+		var _p50 = _p41;
+		return _elm_lang$core$Random$Generator(
+			function (seed0) {
+				var _p51 = _p46._0(seed0);
+				var a = _p51._0;
+				var seed1 = _p51._1;
+				var _p52 = _p47._0(seed1);
+				var b = _p52._0;
+				var seed2 = _p52._1;
+				var _p53 = _p48._0(seed2);
+				var c = _p53._0;
+				var seed3 = _p53._1;
+				var _p54 = _p49._0(seed3);
+				var d = _p54._0;
+				var seed4 = _p54._1;
+				var _p55 = _p50._0(seed4);
+				var e = _p55._0;
+				var seed5 = _p55._1;
+				return {
+					ctor: '_Tuple2',
+					_0: A5(func, a, b, c, d, e),
+					_1: seed5
+				};
+			});
+	});
+var _elm_lang$core$Random$andThen = F2(
+	function (callback, _p56) {
+		var _p57 = _p56;
+		return _elm_lang$core$Random$Generator(
+			function (seed) {
+				var _p58 = _p57._0(seed);
+				var result = _p58._0;
+				var newSeed = _p58._1;
+				var _p59 = callback(result);
+				var genB = _p59._0;
+				return genB(newSeed);
+			});
+	});
+var _elm_lang$core$Random$State = F2(
+	function (a, b) {
+		return {ctor: 'State', _0: a, _1: b};
+	});
+var _elm_lang$core$Random$initState = function (seed) {
+	var s = A2(_elm_lang$core$Basics$max, seed, 0 - seed);
+	var q = (s / (_elm_lang$core$Random$magicNum6 - 1)) | 0;
+	var s2 = A2(_elm_lang$core$Basics_ops['%'], q, _elm_lang$core$Random$magicNum7 - 1);
+	var s1 = A2(_elm_lang$core$Basics_ops['%'], s, _elm_lang$core$Random$magicNum6 - 1);
+	return A2(_elm_lang$core$Random$State, s1 + 1, s2 + 1);
+};
+var _elm_lang$core$Random$next = function (_p60) {
+	var _p61 = _p60;
+	var _p63 = _p61._1;
+	var _p62 = _p61._0;
+	var k2 = (_p63 / _elm_lang$core$Random$magicNum3) | 0;
+	var rawState2 = (_elm_lang$core$Random$magicNum4 * (_p63 - (k2 * _elm_lang$core$Random$magicNum3))) - (k2 * _elm_lang$core$Random$magicNum5);
+	var newState2 = (_elm_lang$core$Native_Utils.cmp(rawState2, 0) < 0) ? (rawState2 + _elm_lang$core$Random$magicNum7) : rawState2;
+	var k1 = (_p62 / _elm_lang$core$Random$magicNum1) | 0;
+	var rawState1 = (_elm_lang$core$Random$magicNum0 * (_p62 - (k1 * _elm_lang$core$Random$magicNum1))) - (k1 * _elm_lang$core$Random$magicNum2);
+	var newState1 = (_elm_lang$core$Native_Utils.cmp(rawState1, 0) < 0) ? (rawState1 + _elm_lang$core$Random$magicNum6) : rawState1;
+	var z = newState1 - newState2;
+	var newZ = (_elm_lang$core$Native_Utils.cmp(z, 1) < 0) ? (z + _elm_lang$core$Random$magicNum8) : z;
+	return {
+		ctor: '_Tuple2',
+		_0: newZ,
+		_1: A2(_elm_lang$core$Random$State, newState1, newState2)
+	};
+};
+var _elm_lang$core$Random$split = function (_p64) {
+	var _p65 = _p64;
+	var _p68 = _p65._1;
+	var _p67 = _p65._0;
+	var _p66 = _elm_lang$core$Tuple$second(
+		_elm_lang$core$Random$next(_p65));
+	var t1 = _p66._0;
+	var t2 = _p66._1;
+	var new_s2 = _elm_lang$core$Native_Utils.eq(_p68, 1) ? (_elm_lang$core$Random$magicNum7 - 1) : (_p68 - 1);
+	var new_s1 = _elm_lang$core$Native_Utils.eq(_p67, _elm_lang$core$Random$magicNum6 - 1) ? 1 : (_p67 + 1);
+	return {
+		ctor: '_Tuple2',
+		_0: A2(_elm_lang$core$Random$State, new_s1, t2),
+		_1: A2(_elm_lang$core$Random$State, t1, new_s2)
+	};
+};
+var _elm_lang$core$Random$Seed = function (a) {
+	return {ctor: 'Seed', _0: a};
+};
+var _elm_lang$core$Random$int = F2(
+	function (a, b) {
+		return _elm_lang$core$Random$Generator(
+			function (_p69) {
+				var _p70 = _p69;
+				var _p75 = _p70._0;
+				var base = 2147483561;
+				var f = F3(
+					function (n, acc, state) {
+						f:
+						while (true) {
+							var _p71 = n;
+							if (_p71 === 0) {
+								return {ctor: '_Tuple2', _0: acc, _1: state};
+							} else {
+								var _p72 = _p75.next(state);
+								var x = _p72._0;
+								var nextState = _p72._1;
+								var _v27 = n - 1,
+									_v28 = x + (acc * base),
+									_v29 = nextState;
+								n = _v27;
+								acc = _v28;
+								state = _v29;
+								continue f;
+							}
+						}
+					});
+				var _p73 = (_elm_lang$core$Native_Utils.cmp(a, b) < 0) ? {ctor: '_Tuple2', _0: a, _1: b} : {ctor: '_Tuple2', _0: b, _1: a};
+				var lo = _p73._0;
+				var hi = _p73._1;
+				var k = (hi - lo) + 1;
+				var n = A2(_elm_lang$core$Random$iLogBase, base, k);
+				var _p74 = A3(f, n, 1, _p75.state);
+				var v = _p74._0;
+				var nextState = _p74._1;
+				return {
+					ctor: '_Tuple2',
+					_0: lo + A2(_elm_lang$core$Basics_ops['%'], v, k),
+					_1: _elm_lang$core$Random$Seed(
+						_elm_lang$core$Native_Utils.update(
+							_p75,
+							{state: nextState}))
+				};
+			});
+	});
+var _elm_lang$core$Random$bool = A2(
+	_elm_lang$core$Random$map,
+	F2(
+		function (x, y) {
+			return _elm_lang$core$Native_Utils.eq(x, y);
+		})(1),
+	A2(_elm_lang$core$Random$int, 0, 1));
+var _elm_lang$core$Random$float = F2(
+	function (a, b) {
+		return _elm_lang$core$Random$Generator(
+			function (seed) {
+				var _p76 = A2(
+					_elm_lang$core$Random$step,
+					A2(_elm_lang$core$Random$int, _elm_lang$core$Random$minInt, _elm_lang$core$Random$maxInt),
+					seed);
+				var number = _p76._0;
+				var newSeed = _p76._1;
+				var negativeOneToOne = _elm_lang$core$Basics$toFloat(number) / _elm_lang$core$Basics$toFloat(_elm_lang$core$Random$maxInt - _elm_lang$core$Random$minInt);
+				var _p77 = (_elm_lang$core$Native_Utils.cmp(a, b) < 0) ? {ctor: '_Tuple2', _0: a, _1: b} : {ctor: '_Tuple2', _0: b, _1: a};
+				var lo = _p77._0;
+				var hi = _p77._1;
+				var scaled = ((lo + hi) / 2) + ((hi - lo) * negativeOneToOne);
+				return {ctor: '_Tuple2', _0: scaled, _1: newSeed};
+			});
+	});
+var _elm_lang$core$Random$initialSeed = function (n) {
+	return _elm_lang$core$Random$Seed(
+		{
+			state: _elm_lang$core$Random$initState(n),
+			next: _elm_lang$core$Random$next,
+			split: _elm_lang$core$Random$split,
+			range: _elm_lang$core$Random$range
+		});
+};
+var _elm_lang$core$Random$init = A2(
+	_elm_lang$core$Task$andThen,
+	function (t) {
+		return _elm_lang$core$Task$succeed(
+			_elm_lang$core$Random$initialSeed(
+				_elm_lang$core$Basics$round(t)));
+	},
+	_elm_lang$core$Time$now);
+var _elm_lang$core$Random$Generate = function (a) {
+	return {ctor: 'Generate', _0: a};
+};
+var _elm_lang$core$Random$generate = F2(
+	function (tagger, generator) {
+		return _elm_lang$core$Random$command(
+			_elm_lang$core$Random$Generate(
+				A2(_elm_lang$core$Random$map, tagger, generator)));
+	});
+var _elm_lang$core$Random$cmdMap = F2(
+	function (func, _p78) {
+		var _p79 = _p78;
+		return _elm_lang$core$Random$Generate(
+			A2(_elm_lang$core$Random$map, func, _p79._0));
+	});
+_elm_lang$core$Native_Platform.effectManagers['Random'] = {pkg: 'elm-lang/core', init: _elm_lang$core$Random$init, onEffects: _elm_lang$core$Random$onEffects, onSelfMsg: _elm_lang$core$Random$onSelfMsg, tag: 'cmd', cmdMap: _elm_lang$core$Random$cmdMap};
+var _elm_lang$core$Set$foldr = F3(
+	function (f, b, _p0) {
+		var _p1 = _p0;
+		return A3(
+			_elm_lang$core$Dict$foldr,
+			F3(
+				function (k, _p2, b) {
+					return A2(f, k, b);
+				}),
+			b,
+			_p1._0);
+	});
+var _elm_lang$core$Set$foldl = F3(
+	function (f, b, _p3) {
+		var _p4 = _p3;
+		return A3(
+			_elm_lang$core$Dict$foldl,
+			F3(
+				function (k, _p5, b) {
+					return A2(f, k, b);
+				}),
+			b,
+			_p4._0);
+	});
+var _elm_lang$core$Set$toList = function (_p6) {
+	var _p7 = _p6;
+	return _elm_lang$core$Dict$keys(_p7._0);
+};
+var _elm_lang$core$Set$size = function (_p8) {
+	var _p9 = _p8;
+	return _elm_lang$core$Dict$size(_p9._0);
+};
+var _elm_lang$core$Set$member = F2(
+	function (k, _p10) {
+		var _p11 = _p10;
+		return A2(_elm_lang$core$Dict$member, k, _p11._0);
+	});
+var _elm_lang$core$Set$isEmpty = function (_p12) {
+	var _p13 = _p12;
+	return _elm_lang$core$Dict$isEmpty(_p13._0);
+};
+var _elm_lang$core$Set$Set_elm_builtin = function (a) {
+	return {ctor: 'Set_elm_builtin', _0: a};
+};
+var _elm_lang$core$Set$empty = _elm_lang$core$Set$Set_elm_builtin(_elm_lang$core$Dict$empty);
+var _elm_lang$core$Set$singleton = function (k) {
+	return _elm_lang$core$Set$Set_elm_builtin(
+		A2(
+			_elm_lang$core$Dict$singleton,
+			k,
+			{ctor: '_Tuple0'}));
+};
+var _elm_lang$core$Set$insert = F2(
+	function (k, _p14) {
+		var _p15 = _p14;
+		return _elm_lang$core$Set$Set_elm_builtin(
+			A3(
+				_elm_lang$core$Dict$insert,
+				k,
+				{ctor: '_Tuple0'},
+				_p15._0));
+	});
+var _elm_lang$core$Set$fromList = function (xs) {
+	return A3(_elm_lang$core$List$foldl, _elm_lang$core$Set$insert, _elm_lang$core$Set$empty, xs);
+};
+var _elm_lang$core$Set$map = F2(
+	function (f, s) {
+		return _elm_lang$core$Set$fromList(
+			A2(
+				_elm_lang$core$List$map,
+				f,
+				_elm_lang$core$Set$toList(s)));
+	});
+var _elm_lang$core$Set$remove = F2(
+	function (k, _p16) {
+		var _p17 = _p16;
+		return _elm_lang$core$Set$Set_elm_builtin(
+			A2(_elm_lang$core$Dict$remove, k, _p17._0));
+	});
+var _elm_lang$core$Set$union = F2(
+	function (_p19, _p18) {
+		var _p20 = _p19;
+		var _p21 = _p18;
+		return _elm_lang$core$Set$Set_elm_builtin(
+			A2(_elm_lang$core$Dict$union, _p20._0, _p21._0));
+	});
+var _elm_lang$core$Set$intersect = F2(
+	function (_p23, _p22) {
+		var _p24 = _p23;
+		var _p25 = _p22;
+		return _elm_lang$core$Set$Set_elm_builtin(
+			A2(_elm_lang$core$Dict$intersect, _p24._0, _p25._0));
+	});
+var _elm_lang$core$Set$diff = F2(
+	function (_p27, _p26) {
+		var _p28 = _p27;
+		var _p29 = _p26;
+		return _elm_lang$core$Set$Set_elm_builtin(
+			A2(_elm_lang$core$Dict$diff, _p28._0, _p29._0));
+	});
+var _elm_lang$core$Set$filter = F2(
+	function (p, _p30) {
+		var _p31 = _p30;
+		return _elm_lang$core$Set$Set_elm_builtin(
+			A2(
+				_elm_lang$core$Dict$filter,
+				F2(
+					function (k, _p32) {
+						return p(k);
+					}),
+				_p31._0));
+	});
+var _elm_lang$core$Set$partition = F2(
+	function (p, _p33) {
+		var _p34 = _p33;
+		var _p35 = A2(
+			_elm_lang$core$Dict$partition,
+			F2(
+				function (k, _p36) {
+					return p(k);
+				}),
+			_p34._0);
+		var p1 = _p35._0;
+		var p2 = _p35._1;
+		return {
+			ctor: '_Tuple2',
+			_0: _elm_lang$core$Set$Set_elm_builtin(p1),
+			_1: _elm_lang$core$Set$Set_elm_builtin(p2)
+		};
+	});
+var _elm_community$list_extra$List_Extra$greedyGroupsOfWithStep = F3(
+	function (size, step, xs) {
+		var okayXs = _elm_lang$core$Native_Utils.cmp(
+			_elm_lang$core$List$length(xs),
+			0) > 0;
+		var okayArgs = (_elm_lang$core$Native_Utils.cmp(size, 0) > 0) && (_elm_lang$core$Native_Utils.cmp(step, 0) > 0);
+		var xs_ = A2(_elm_lang$core$List$drop, step, xs);
+		var group = A2(_elm_lang$core$List$take, size, xs);
+		return (okayArgs && okayXs) ? {
+			ctor: '::',
+			_0: group,
+			_1: A3(_elm_community$list_extra$List_Extra$greedyGroupsOfWithStep, size, step, xs_)
+		} : {ctor: '[]'};
+	});
+var _elm_community$list_extra$List_Extra$greedyGroupsOf = F2(
+	function (size, xs) {
+		return A3(_elm_community$list_extra$List_Extra$greedyGroupsOfWithStep, size, size, xs);
+	});
+var _elm_community$list_extra$List_Extra$groupsOfWithStep = F3(
+	function (size, step, xs) {
+		var okayArgs = (_elm_lang$core$Native_Utils.cmp(size, 0) > 0) && (_elm_lang$core$Native_Utils.cmp(step, 0) > 0);
+		var xs_ = A2(_elm_lang$core$List$drop, step, xs);
+		var group = A2(_elm_lang$core$List$take, size, xs);
+		var okayLength = _elm_lang$core$Native_Utils.eq(
+			size,
+			_elm_lang$core$List$length(group));
+		return (okayArgs && okayLength) ? {
+			ctor: '::',
+			_0: group,
+			_1: A3(_elm_community$list_extra$List_Extra$groupsOfWithStep, size, step, xs_)
+		} : {ctor: '[]'};
+	});
+var _elm_community$list_extra$List_Extra$groupsOf = F2(
+	function (size, xs) {
+		return A3(_elm_community$list_extra$List_Extra$groupsOfWithStep, size, size, xs);
+	});
+var _elm_community$list_extra$List_Extra$zip5 = _elm_lang$core$List$map5(
+	F5(
+		function (v0, v1, v2, v3, v4) {
+			return {ctor: '_Tuple5', _0: v0, _1: v1, _2: v2, _3: v3, _4: v4};
+		}));
+var _elm_community$list_extra$List_Extra$zip4 = _elm_lang$core$List$map4(
+	F4(
+		function (v0, v1, v2, v3) {
+			return {ctor: '_Tuple4', _0: v0, _1: v1, _2: v2, _3: v3};
+		}));
+var _elm_community$list_extra$List_Extra$zip3 = _elm_lang$core$List$map3(
+	F3(
+		function (v0, v1, v2) {
+			return {ctor: '_Tuple3', _0: v0, _1: v1, _2: v2};
+		}));
+var _elm_community$list_extra$List_Extra$zip = _elm_lang$core$List$map2(
+	F2(
+		function (v0, v1) {
+			return {ctor: '_Tuple2', _0: v0, _1: v1};
+		}));
+var _elm_community$list_extra$List_Extra$isPrefixOf = F2(
+	function (prefix, xs) {
+		var _p0 = {ctor: '_Tuple2', _0: prefix, _1: xs};
+		if (_p0._0.ctor === '[]') {
+			return true;
+		} else {
+			if (_p0._1.ctor === '[]') {
+				return false;
+			} else {
+				return _elm_lang$core$Native_Utils.eq(_p0._0._0, _p0._1._0) && A2(_elm_community$list_extra$List_Extra$isPrefixOf, _p0._0._1, _p0._1._1);
+			}
+		}
+	});
+var _elm_community$list_extra$List_Extra$isSuffixOf = F2(
+	function (suffix, xs) {
+		return A2(
+			_elm_community$list_extra$List_Extra$isPrefixOf,
+			_elm_lang$core$List$reverse(suffix),
+			_elm_lang$core$List$reverse(xs));
+	});
+var _elm_community$list_extra$List_Extra$selectSplit = function (xs) {
+	var _p1 = xs;
+	if (_p1.ctor === '[]') {
+		return {ctor: '[]'};
+	} else {
+		var _p5 = _p1._1;
+		var _p4 = _p1._0;
+		return {
+			ctor: '::',
+			_0: {
+				ctor: '_Tuple3',
+				_0: {ctor: '[]'},
+				_1: _p4,
+				_2: _p5
+			},
+			_1: A2(
+				_elm_lang$core$List$map,
+				function (_p2) {
+					var _p3 = _p2;
+					return {
+						ctor: '_Tuple3',
+						_0: {ctor: '::', _0: _p4, _1: _p3._0},
+						_1: _p3._1,
+						_2: _p3._2
+					};
+				},
+				_elm_community$list_extra$List_Extra$selectSplit(_p5))
+		};
+	}
+};
+var _elm_community$list_extra$List_Extra$select = function (xs) {
+	var _p6 = xs;
+	if (_p6.ctor === '[]') {
+		return {ctor: '[]'};
+	} else {
+		var _p10 = _p6._1;
+		var _p9 = _p6._0;
+		return {
+			ctor: '::',
+			_0: {ctor: '_Tuple2', _0: _p9, _1: _p10},
+			_1: A2(
+				_elm_lang$core$List$map,
+				function (_p7) {
+					var _p8 = _p7;
+					return {
+						ctor: '_Tuple2',
+						_0: _p8._0,
+						_1: {ctor: '::', _0: _p9, _1: _p8._1}
+					};
+				},
+				_elm_community$list_extra$List_Extra$select(_p10))
+		};
+	}
+};
+var _elm_community$list_extra$List_Extra$tailsHelp = F2(
+	function (e, list) {
+		var _p11 = list;
+		if (_p11.ctor === '::') {
+			var _p12 = _p11._0;
+			return {
+				ctor: '::',
+				_0: {ctor: '::', _0: e, _1: _p12},
+				_1: {ctor: '::', _0: _p12, _1: _p11._1}
+			};
+		} else {
+			return {ctor: '[]'};
+		}
+	});
+var _elm_community$list_extra$List_Extra$tails = A2(
+	_elm_lang$core$List$foldr,
+	_elm_community$list_extra$List_Extra$tailsHelp,
+	{
+		ctor: '::',
+		_0: {ctor: '[]'},
+		_1: {ctor: '[]'}
+	});
+var _elm_community$list_extra$List_Extra$isInfixOf = F2(
+	function (infix, xs) {
+		return A2(
+			_elm_lang$core$List$any,
+			_elm_community$list_extra$List_Extra$isPrefixOf(infix),
+			_elm_community$list_extra$List_Extra$tails(xs));
+	});
+var _elm_community$list_extra$List_Extra$inits = A2(
+	_elm_lang$core$List$foldr,
+	F2(
+		function (e, acc) {
+			return {
+				ctor: '::',
+				_0: {ctor: '[]'},
+				_1: A2(
+					_elm_lang$core$List$map,
+					F2(
+						function (x, y) {
+							return {ctor: '::', _0: x, _1: y};
+						})(e),
+					acc)
+			};
+		}),
+	{
+		ctor: '::',
+		_0: {ctor: '[]'},
+		_1: {ctor: '[]'}
+	});
+var _elm_community$list_extra$List_Extra$groupWhileTransitively = F2(
+	function (cmp, xs_) {
+		var _p13 = xs_;
+		if (_p13.ctor === '[]') {
+			return {ctor: '[]'};
+		} else {
+			if (_p13._1.ctor === '[]') {
+				return {
+					ctor: '::',
+					_0: {
+						ctor: '::',
+						_0: _p13._0,
+						_1: {ctor: '[]'}
+					},
+					_1: {ctor: '[]'}
+				};
+			} else {
+				var _p15 = _p13._0;
+				var _p14 = A2(_elm_community$list_extra$List_Extra$groupWhileTransitively, cmp, _p13._1);
+				if (_p14.ctor === '::') {
+					return A2(cmp, _p15, _p13._1._0) ? {
+						ctor: '::',
+						_0: {ctor: '::', _0: _p15, _1: _p14._0},
+						_1: _p14._1
+					} : {
+						ctor: '::',
+						_0: {
+							ctor: '::',
+							_0: _p15,
+							_1: {ctor: '[]'}
+						},
+						_1: _p14
+					};
+				} else {
+					return {ctor: '[]'};
+				}
+			}
+		}
+	});
+var _elm_community$list_extra$List_Extra$stripPrefix = F2(
+	function (prefix, xs) {
+		var step = F2(
+			function (e, m) {
+				var _p16 = m;
+				if (_p16.ctor === 'Nothing') {
+					return _elm_lang$core$Maybe$Nothing;
+				} else {
+					if (_p16._0.ctor === '[]') {
+						return _elm_lang$core$Maybe$Nothing;
+					} else {
+						return _elm_lang$core$Native_Utils.eq(e, _p16._0._0) ? _elm_lang$core$Maybe$Just(_p16._0._1) : _elm_lang$core$Maybe$Nothing;
+					}
+				}
+			});
+		return A3(
+			_elm_lang$core$List$foldl,
+			step,
+			_elm_lang$core$Maybe$Just(xs),
+			prefix);
+	});
+var _elm_community$list_extra$List_Extra$dropWhileRight = function (p) {
+	return A2(
+		_elm_lang$core$List$foldr,
+		F2(
+			function (x, xs) {
+				return (p(x) && _elm_lang$core$List$isEmpty(xs)) ? {ctor: '[]'} : {ctor: '::', _0: x, _1: xs};
+			}),
+		{ctor: '[]'});
+};
+var _elm_community$list_extra$List_Extra$takeWhileRight = function (p) {
+	var step = F2(
+		function (x, _p17) {
+			var _p18 = _p17;
+			var _p19 = _p18._0;
+			return (p(x) && _p18._1) ? {
+				ctor: '_Tuple2',
+				_0: {ctor: '::', _0: x, _1: _p19},
+				_1: true
+			} : {ctor: '_Tuple2', _0: _p19, _1: false};
+		});
+	return function (_p20) {
+		return _elm_lang$core$Tuple$first(
+			A3(
+				_elm_lang$core$List$foldr,
+				step,
+				{
+					ctor: '_Tuple2',
+					_0: {ctor: '[]'},
+					_1: true
+				},
+				_p20));
+	};
+};
+var _elm_community$list_extra$List_Extra$splitAt = F2(
+	function (n, xs) {
+		return {
+			ctor: '_Tuple2',
+			_0: A2(_elm_lang$core$List$take, n, xs),
+			_1: A2(_elm_lang$core$List$drop, n, xs)
+		};
+	});
+var _elm_community$list_extra$List_Extra$groupsOfVarying_ = F3(
+	function (listOflengths, list, accu) {
+		groupsOfVarying_:
+		while (true) {
+			var _p21 = {ctor: '_Tuple2', _0: listOflengths, _1: list};
+			if (((_p21.ctor === '_Tuple2') && (_p21._0.ctor === '::')) && (_p21._1.ctor === '::')) {
+				var _p22 = A2(_elm_community$list_extra$List_Extra$splitAt, _p21._0._0, list);
+				var head = _p22._0;
+				var tail = _p22._1;
+				var _v11 = _p21._0._1,
+					_v12 = tail,
+					_v13 = {ctor: '::', _0: head, _1: accu};
+				listOflengths = _v11;
+				list = _v12;
+				accu = _v13;
+				continue groupsOfVarying_;
+			} else {
+				return _elm_lang$core$List$reverse(accu);
+			}
+		}
+	});
+var _elm_community$list_extra$List_Extra$groupsOfVarying = F2(
+	function (listOflengths, list) {
+		return A3(
+			_elm_community$list_extra$List_Extra$groupsOfVarying_,
+			listOflengths,
+			list,
+			{ctor: '[]'});
+	});
+var _elm_community$list_extra$List_Extra$unfoldr = F2(
+	function (f, seed) {
+		var _p23 = f(seed);
+		if (_p23.ctor === 'Nothing') {
+			return {ctor: '[]'};
+		} else {
+			return {
+				ctor: '::',
+				_0: _p23._0._0,
+				_1: A2(_elm_community$list_extra$List_Extra$unfoldr, f, _p23._0._1)
+			};
+		}
+	});
+var _elm_community$list_extra$List_Extra$scanr1 = F2(
+	function (f, xs_) {
+		var _p24 = xs_;
+		if (_p24.ctor === '[]') {
+			return {ctor: '[]'};
+		} else {
+			if (_p24._1.ctor === '[]') {
+				return {
+					ctor: '::',
+					_0: _p24._0,
+					_1: {ctor: '[]'}
+				};
+			} else {
+				var _p25 = A2(_elm_community$list_extra$List_Extra$scanr1, f, _p24._1);
+				if (_p25.ctor === '::') {
+					return {
+						ctor: '::',
+						_0: A2(f, _p24._0, _p25._0),
+						_1: _p25
+					};
+				} else {
+					return {ctor: '[]'};
+				}
+			}
+		}
+	});
+var _elm_community$list_extra$List_Extra$scanr = F3(
+	function (f, acc, xs_) {
+		var _p26 = xs_;
+		if (_p26.ctor === '[]') {
+			return {
+				ctor: '::',
+				_0: acc,
+				_1: {ctor: '[]'}
+			};
+		} else {
+			var _p27 = A3(_elm_community$list_extra$List_Extra$scanr, f, acc, _p26._1);
+			if (_p27.ctor === '::') {
+				return {
+					ctor: '::',
+					_0: A2(f, _p26._0, _p27._0),
+					_1: _p27
+				};
+			} else {
+				return {ctor: '[]'};
+			}
+		}
+	});
+var _elm_community$list_extra$List_Extra$scanl1 = F2(
+	function (f, xs_) {
+		var _p28 = xs_;
+		if (_p28.ctor === '[]') {
+			return {ctor: '[]'};
+		} else {
+			return A3(_elm_lang$core$List$scanl, f, _p28._0, _p28._1);
+		}
+	});
+var _elm_community$list_extra$List_Extra$indexedFoldr = F3(
+	function (func, acc, list) {
+		var step = F2(
+			function (x, _p29) {
+				var _p30 = _p29;
+				var _p31 = _p30._0;
+				return {
+					ctor: '_Tuple2',
+					_0: _p31 - 1,
+					_1: A3(func, _p31, x, _p30._1)
+				};
+			});
+		return _elm_lang$core$Tuple$second(
+			A3(
+				_elm_lang$core$List$foldr,
+				step,
+				{
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$List$length(list) - 1,
+					_1: acc
+				},
+				list));
+	});
+var _elm_community$list_extra$List_Extra$indexedFoldl = F3(
+	function (func, acc, list) {
+		var step = F2(
+			function (x, _p32) {
+				var _p33 = _p32;
+				var _p34 = _p33._0;
+				return {
+					ctor: '_Tuple2',
+					_0: _p34 + 1,
+					_1: A3(func, _p34, x, _p33._1)
+				};
+			});
+		return _elm_lang$core$Tuple$second(
+			A3(
+				_elm_lang$core$List$foldl,
+				step,
+				{ctor: '_Tuple2', _0: 0, _1: acc},
+				list));
+	});
+var _elm_community$list_extra$List_Extra$foldr1 = F2(
+	function (f, xs) {
+		var mf = F2(
+			function (x, m) {
+				return _elm_lang$core$Maybe$Just(
+					function () {
+						var _p35 = m;
+						if (_p35.ctor === 'Nothing') {
+							return x;
+						} else {
+							return A2(f, x, _p35._0);
+						}
+					}());
+			});
+		return A3(_elm_lang$core$List$foldr, mf, _elm_lang$core$Maybe$Nothing, xs);
+	});
+var _elm_community$list_extra$List_Extra$foldl1 = F2(
+	function (f, xs) {
+		var mf = F2(
+			function (x, m) {
+				return _elm_lang$core$Maybe$Just(
+					function () {
+						var _p36 = m;
+						if (_p36.ctor === 'Nothing') {
+							return x;
+						} else {
+							return A2(f, _p36._0, x);
+						}
+					}());
+			});
+		return A3(_elm_lang$core$List$foldl, mf, _elm_lang$core$Maybe$Nothing, xs);
+	});
+var _elm_community$list_extra$List_Extra$interweaveHelp = F3(
+	function (l1, l2, acc) {
+		interweaveHelp:
+		while (true) {
+			var _p37 = {ctor: '_Tuple2', _0: l1, _1: l2};
+			_v24_1:
+			do {
+				if (_p37._0.ctor === '::') {
+					if (_p37._1.ctor === '::') {
+						var _v25 = _p37._0._1,
+							_v26 = _p37._1._1,
+							_v27 = A2(
+							_elm_lang$core$Basics_ops['++'],
+							acc,
+							{
+								ctor: '::',
+								_0: _p37._0._0,
+								_1: {
+									ctor: '::',
+									_0: _p37._1._0,
+									_1: {ctor: '[]'}
+								}
+							});
+						l1 = _v25;
+						l2 = _v26;
+						acc = _v27;
+						continue interweaveHelp;
+					} else {
+						break _v24_1;
+					}
+				} else {
+					if (_p37._1.ctor === '[]') {
+						break _v24_1;
+					} else {
+						return A2(_elm_lang$core$Basics_ops['++'], acc, _p37._1);
+					}
+				}
+			} while(false);
+			return A2(_elm_lang$core$Basics_ops['++'], acc, _p37._0);
+		}
+	});
+var _elm_community$list_extra$List_Extra$interweave = F2(
+	function (l1, l2) {
+		return A3(
+			_elm_community$list_extra$List_Extra$interweaveHelp,
+			l1,
+			l2,
+			{ctor: '[]'});
+	});
+var _elm_community$list_extra$List_Extra$permutations = function (xs_) {
+	var _p38 = xs_;
+	if (_p38.ctor === '[]') {
+		return {
+			ctor: '::',
+			_0: {ctor: '[]'},
+			_1: {ctor: '[]'}
+		};
+	} else {
+		var f = function (_p39) {
+			var _p40 = _p39;
+			return A2(
+				_elm_lang$core$List$map,
+				F2(
+					function (x, y) {
+						return {ctor: '::', _0: x, _1: y};
+					})(_p40._0),
+				_elm_community$list_extra$List_Extra$permutations(_p40._1));
+		};
+		return A2(
+			_elm_lang$core$List$concatMap,
+			f,
+			_elm_community$list_extra$List_Extra$select(_p38));
+	}
+};
+var _elm_community$list_extra$List_Extra$isPermutationOf = F2(
+	function (permut, xs) {
+		return A2(
+			_elm_lang$core$List$member,
+			permut,
+			_elm_community$list_extra$List_Extra$permutations(xs));
+	});
+var _elm_community$list_extra$List_Extra$subsequencesNonEmpty = function (xs) {
+	var _p41 = xs;
+	if (_p41.ctor === '[]') {
+		return {ctor: '[]'};
+	} else {
+		var _p42 = _p41._0;
+		var f = F2(
+			function (ys, r) {
+				return {
+					ctor: '::',
+					_0: ys,
+					_1: {
+						ctor: '::',
+						_0: {ctor: '::', _0: _p42, _1: ys},
+						_1: r
+					}
+				};
+			});
+		return {
+			ctor: '::',
+			_0: {
+				ctor: '::',
+				_0: _p42,
+				_1: {ctor: '[]'}
+			},
+			_1: A3(
+				_elm_lang$core$List$foldr,
+				f,
+				{ctor: '[]'},
+				_elm_community$list_extra$List_Extra$subsequencesNonEmpty(_p41._1))
+		};
+	}
+};
+var _elm_community$list_extra$List_Extra$subsequences = function (xs) {
+	return {
+		ctor: '::',
+		_0: {ctor: '[]'},
+		_1: _elm_community$list_extra$List_Extra$subsequencesNonEmpty(xs)
+	};
+};
+var _elm_community$list_extra$List_Extra$isSubsequenceOf = F2(
+	function (subseq, xs) {
+		return A2(
+			_elm_lang$core$List$member,
+			subseq,
+			_elm_community$list_extra$List_Extra$subsequences(xs));
+	});
+var _elm_community$list_extra$List_Extra$transpose = function (ll) {
+	transpose:
+	while (true) {
+		var _p43 = ll;
+		if (_p43.ctor === '[]') {
+			return {ctor: '[]'};
+		} else {
+			if (_p43._0.ctor === '[]') {
+				var _v32 = _p43._1;
+				ll = _v32;
+				continue transpose;
+			} else {
+				var _p44 = _p43._1;
+				var tails = A2(_elm_lang$core$List$filterMap, _elm_lang$core$List$tail, _p44);
+				var heads = A2(_elm_lang$core$List$filterMap, _elm_lang$core$List$head, _p44);
+				return {
+					ctor: '::',
+					_0: {ctor: '::', _0: _p43._0._0, _1: heads},
+					_1: _elm_community$list_extra$List_Extra$transpose(
+						{ctor: '::', _0: _p43._0._1, _1: tails})
+				};
+			}
+		}
+	}
+};
+var _elm_community$list_extra$List_Extra$intercalate = function (xs) {
+	return function (_p45) {
+		return _elm_lang$core$List$concat(
+			A2(_elm_lang$core$List$intersperse, xs, _p45));
+	};
+};
+var _elm_community$list_extra$List_Extra$filterNot = F2(
+	function (pred, list) {
+		return A2(
+			_elm_lang$core$List$filter,
+			function (_p46) {
+				return !pred(_p46);
+			},
+			list);
+	});
+var _elm_community$list_extra$List_Extra$removeAt = F2(
+	function (index, l) {
+		if (_elm_lang$core$Native_Utils.cmp(index, 0) < 0) {
+			return l;
+		} else {
+			var tail = _elm_lang$core$List$tail(
+				A2(_elm_lang$core$List$drop, index, l));
+			var head = A2(_elm_lang$core$List$take, index, l);
+			var _p47 = tail;
+			if (_p47.ctor === 'Nothing') {
+				return l;
+			} else {
+				return A2(_elm_lang$core$List$append, head, _p47._0);
+			}
+		}
+	});
+var _elm_community$list_extra$List_Extra$singleton = function (x) {
+	return {
+		ctor: '::',
+		_0: x,
+		_1: {ctor: '[]'}
+	};
+};
+var _elm_community$list_extra$List_Extra$stableSortWith = F2(
+	function (pred, list) {
+		var predWithIndex = F2(
+			function (_p49, _p48) {
+				var _p50 = _p49;
+				var _p51 = _p48;
+				var result = A2(pred, _p50._0, _p51._0);
+				var _p52 = result;
+				if (_p52.ctor === 'EQ') {
+					return A2(_elm_lang$core$Basics$compare, _p50._1, _p51._1);
+				} else {
+					return result;
+				}
+			});
+		var listWithIndex = A2(
+			_elm_lang$core$List$indexedMap,
+			F2(
+				function (i, a) {
+					return {ctor: '_Tuple2', _0: a, _1: i};
+				}),
+			list);
+		return A2(
+			_elm_lang$core$List$map,
+			_elm_lang$core$Tuple$first,
+			A2(_elm_lang$core$List$sortWith, predWithIndex, listWithIndex));
+	});
+var _elm_community$list_extra$List_Extra$setAt = F3(
+	function (index, value, l) {
+		if (_elm_lang$core$Native_Utils.cmp(index, 0) < 0) {
+			return _elm_lang$core$Maybe$Nothing;
+		} else {
+			var tail = _elm_lang$core$List$tail(
+				A2(_elm_lang$core$List$drop, index, l));
+			var head = A2(_elm_lang$core$List$take, index, l);
+			var _p53 = tail;
+			if (_p53.ctor === 'Nothing') {
+				return _elm_lang$core$Maybe$Nothing;
+			} else {
+				return _elm_lang$core$Maybe$Just(
+					A2(
+						_elm_lang$core$List$append,
+						head,
+						{ctor: '::', _0: value, _1: _p53._0}));
+			}
+		}
+	});
+var _elm_community$list_extra$List_Extra$remove = F2(
+	function (x, xs) {
+		var _p54 = xs;
+		if (_p54.ctor === '[]') {
+			return {ctor: '[]'};
+		} else {
+			var _p56 = _p54._1;
+			var _p55 = _p54._0;
+			return _elm_lang$core$Native_Utils.eq(x, _p55) ? _p56 : {
+				ctor: '::',
+				_0: _p55,
+				_1: A2(_elm_community$list_extra$List_Extra$remove, x, _p56)
+			};
+		}
+	});
+var _elm_community$list_extra$List_Extra$updateIfIndex = F3(
+	function (predicate, update, list) {
+		return A2(
+			_elm_lang$core$List$indexedMap,
+			F2(
+				function (i, x) {
+					return predicate(i) ? update(x) : x;
+				}),
+			list);
+	});
+var _elm_community$list_extra$List_Extra$updateAt = F3(
+	function (index, update, list) {
+		return ((_elm_lang$core$Native_Utils.cmp(index, 0) < 0) || (_elm_lang$core$Native_Utils.cmp(
+			index,
+			_elm_lang$core$List$length(list)) > -1)) ? _elm_lang$core$Maybe$Nothing : _elm_lang$core$Maybe$Just(
+			A3(
+				_elm_community$list_extra$List_Extra$updateIfIndex,
+				F2(
+					function (x, y) {
+						return _elm_lang$core$Native_Utils.eq(x, y);
+					})(index),
+				update,
+				list));
+	});
+var _elm_community$list_extra$List_Extra$updateIf = F3(
+	function (predicate, update, list) {
+		return A2(
+			_elm_lang$core$List$map,
+			function (item) {
+				return predicate(item) ? update(item) : item;
+			},
+			list);
+	});
+var _elm_community$list_extra$List_Extra$replaceIf = F3(
+	function (predicate, replacement, list) {
+		return A3(
+			_elm_community$list_extra$List_Extra$updateIf,
+			predicate,
+			_elm_lang$core$Basics$always(replacement),
+			list);
+	});
+var _elm_community$list_extra$List_Extra$findIndices = function (p) {
+	return function (_p57) {
+		return A2(
+			_elm_lang$core$List$map,
+			_elm_lang$core$Tuple$first,
+			A2(
+				_elm_lang$core$List$filter,
+				function (_p58) {
+					var _p59 = _p58;
+					return p(_p59._1);
+				},
+				A2(
+					_elm_lang$core$List$indexedMap,
+					F2(
+						function (v0, v1) {
+							return {ctor: '_Tuple2', _0: v0, _1: v1};
+						}),
+					_p57)));
+	};
+};
+var _elm_community$list_extra$List_Extra$findIndex = function (p) {
+	return function (_p60) {
+		return _elm_lang$core$List$head(
+			A2(_elm_community$list_extra$List_Extra$findIndices, p, _p60));
+	};
+};
+var _elm_community$list_extra$List_Extra$elemIndices = function (x) {
+	return _elm_community$list_extra$List_Extra$findIndices(
+		F2(
+			function (x, y) {
+				return _elm_lang$core$Native_Utils.eq(x, y);
+			})(x));
+};
+var _elm_community$list_extra$List_Extra$elemIndex = function (x) {
+	return _elm_community$list_extra$List_Extra$findIndex(
+		F2(
+			function (x, y) {
+				return _elm_lang$core$Native_Utils.eq(x, y);
+			})(x));
+};
+var _elm_community$list_extra$List_Extra$find = F2(
+	function (predicate, list) {
+		find:
+		while (true) {
+			var _p61 = list;
+			if (_p61.ctor === '[]') {
+				return _elm_lang$core$Maybe$Nothing;
+			} else {
+				var _p62 = _p61._0;
+				if (predicate(_p62)) {
+					return _elm_lang$core$Maybe$Just(_p62);
+				} else {
+					var _v41 = predicate,
+						_v42 = _p61._1;
+					predicate = _v41;
+					list = _v42;
+					continue find;
+				}
+			}
+		}
+	});
+var _elm_community$list_extra$List_Extra$notMember = function (x) {
+	return function (_p63) {
+		return !A2(_elm_lang$core$List$member, x, _p63);
+	};
+};
+var _elm_community$list_extra$List_Extra$andThen = _elm_lang$core$List$concatMap;
+var _elm_community$list_extra$List_Extra$lift2 = F3(
+	function (f, la, lb) {
+		return A2(
+			_elm_community$list_extra$List_Extra$andThen,
+			function (a) {
+				return A2(
+					_elm_community$list_extra$List_Extra$andThen,
+					function (b) {
+						return {
+							ctor: '::',
+							_0: A2(f, a, b),
+							_1: {ctor: '[]'}
+						};
+					},
+					lb);
+			},
+			la);
+	});
+var _elm_community$list_extra$List_Extra$lift3 = F4(
+	function (f, la, lb, lc) {
+		return A2(
+			_elm_community$list_extra$List_Extra$andThen,
+			function (a) {
+				return A2(
+					_elm_community$list_extra$List_Extra$andThen,
+					function (b) {
+						return A2(
+							_elm_community$list_extra$List_Extra$andThen,
+							function (c) {
+								return {
+									ctor: '::',
+									_0: A3(f, a, b, c),
+									_1: {ctor: '[]'}
+								};
+							},
+							lc);
+					},
+					lb);
+			},
+			la);
+	});
+var _elm_community$list_extra$List_Extra$lift4 = F5(
+	function (f, la, lb, lc, ld) {
+		return A2(
+			_elm_community$list_extra$List_Extra$andThen,
+			function (a) {
+				return A2(
+					_elm_community$list_extra$List_Extra$andThen,
+					function (b) {
+						return A2(
+							_elm_community$list_extra$List_Extra$andThen,
+							function (c) {
+								return A2(
+									_elm_community$list_extra$List_Extra$andThen,
+									function (d) {
+										return {
+											ctor: '::',
+											_0: A4(f, a, b, c, d),
+											_1: {ctor: '[]'}
+										};
+									},
+									ld);
+							},
+							lc);
+					},
+					lb);
+			},
+			la);
+	});
+var _elm_community$list_extra$List_Extra$andMap = F2(
+	function (l, fl) {
+		return A3(
+			_elm_lang$core$List$map2,
+			F2(
+				function (x, y) {
+					return x(y);
+				}),
+			fl,
+			l);
+	});
+var _elm_community$list_extra$List_Extra$uniqueHelp = F3(
+	function (f, existing, remaining) {
+		uniqueHelp:
+		while (true) {
+			var _p64 = remaining;
+			if (_p64.ctor === '[]') {
+				return {ctor: '[]'};
+			} else {
+				var _p66 = _p64._1;
+				var _p65 = _p64._0;
+				var computedFirst = f(_p65);
+				if (A2(_elm_lang$core$Set$member, computedFirst, existing)) {
+					var _v44 = f,
+						_v45 = existing,
+						_v46 = _p66;
+					f = _v44;
+					existing = _v45;
+					remaining = _v46;
+					continue uniqueHelp;
+				} else {
+					return {
+						ctor: '::',
+						_0: _p65,
+						_1: A3(
+							_elm_community$list_extra$List_Extra$uniqueHelp,
+							f,
+							A2(_elm_lang$core$Set$insert, computedFirst, existing),
+							_p66)
+					};
+				}
+			}
+		}
+	});
+var _elm_community$list_extra$List_Extra$uniqueBy = F2(
+	function (f, list) {
+		return A3(_elm_community$list_extra$List_Extra$uniqueHelp, f, _elm_lang$core$Set$empty, list);
+	});
+var _elm_community$list_extra$List_Extra$allDifferentBy = F2(
+	function (f, list) {
+		return _elm_lang$core$Native_Utils.eq(
+			_elm_lang$core$List$length(list),
+			_elm_lang$core$List$length(
+				A2(_elm_community$list_extra$List_Extra$uniqueBy, f, list)));
+	});
+var _elm_community$list_extra$List_Extra$allDifferent = function (list) {
+	return A2(_elm_community$list_extra$List_Extra$allDifferentBy, _elm_lang$core$Basics$identity, list);
+};
+var _elm_community$list_extra$List_Extra$unique = function (list) {
+	return A3(_elm_community$list_extra$List_Extra$uniqueHelp, _elm_lang$core$Basics$identity, _elm_lang$core$Set$empty, list);
+};
+var _elm_community$list_extra$List_Extra$dropWhile = F2(
+	function (predicate, list) {
+		dropWhile:
+		while (true) {
+			var _p67 = list;
+			if (_p67.ctor === '[]') {
+				return {ctor: '[]'};
+			} else {
+				if (predicate(_p67._0)) {
+					var _v48 = predicate,
+						_v49 = _p67._1;
+					predicate = _v48;
+					list = _v49;
+					continue dropWhile;
+				} else {
+					return list;
+				}
+			}
+		}
+	});
+var _elm_community$list_extra$List_Extra$takeWhile = F2(
+	function (predicate, list) {
+		var _p68 = list;
+		if (_p68.ctor === '[]') {
+			return {ctor: '[]'};
+		} else {
+			var _p69 = _p68._0;
+			return predicate(_p69) ? {
+				ctor: '::',
+				_0: _p69,
+				_1: A2(_elm_community$list_extra$List_Extra$takeWhile, predicate, _p68._1)
+			} : {ctor: '[]'};
+		}
+	});
+var _elm_community$list_extra$List_Extra$span = F2(
+	function (p, xs) {
+		return {
+			ctor: '_Tuple2',
+			_0: A2(_elm_community$list_extra$List_Extra$takeWhile, p, xs),
+			_1: A2(_elm_community$list_extra$List_Extra$dropWhile, p, xs)
+		};
+	});
+var _elm_community$list_extra$List_Extra$break = function (p) {
+	return _elm_community$list_extra$List_Extra$span(
+		function (_p70) {
+			return !p(_p70);
+		});
+};
+var _elm_community$list_extra$List_Extra$groupWhile = F2(
+	function (eq, xs_) {
+		var _p71 = xs_;
+		if (_p71.ctor === '[]') {
+			return {ctor: '[]'};
+		} else {
+			var _p73 = _p71._0;
+			var _p72 = A2(
+				_elm_community$list_extra$List_Extra$span,
+				eq(_p73),
+				_p71._1);
+			var ys = _p72._0;
+			var zs = _p72._1;
+			return {
+				ctor: '::',
+				_0: {ctor: '::', _0: _p73, _1: ys},
+				_1: A2(_elm_community$list_extra$List_Extra$groupWhile, eq, zs)
+			};
+		}
+	});
+var _elm_community$list_extra$List_Extra$group = _elm_community$list_extra$List_Extra$groupWhile(
+	F2(
+		function (x, y) {
+			return _elm_lang$core$Native_Utils.eq(x, y);
+		}));
+var _elm_community$list_extra$List_Extra$minimumBy = F2(
+	function (f, ls) {
+		var minBy = F2(
+			function (x, _p74) {
+				var _p75 = _p74;
+				var _p76 = _p75._1;
+				var fx = f(x);
+				return (_elm_lang$core$Native_Utils.cmp(fx, _p76) < 0) ? {ctor: '_Tuple2', _0: x, _1: fx} : {ctor: '_Tuple2', _0: _p75._0, _1: _p76};
+			});
+		var _p77 = ls;
+		if (_p77.ctor === '::') {
+			if (_p77._1.ctor === '[]') {
+				return _elm_lang$core$Maybe$Just(_p77._0);
+			} else {
+				var _p78 = _p77._0;
+				return _elm_lang$core$Maybe$Just(
+					_elm_lang$core$Tuple$first(
+						A3(
+							_elm_lang$core$List$foldl,
+							minBy,
+							{
+								ctor: '_Tuple2',
+								_0: _p78,
+								_1: f(_p78)
+							},
+							_p77._1)));
+			}
+		} else {
+			return _elm_lang$core$Maybe$Nothing;
+		}
+	});
+var _elm_community$list_extra$List_Extra$maximumBy = F2(
+	function (f, ls) {
+		var maxBy = F2(
+			function (x, _p79) {
+				var _p80 = _p79;
+				var _p81 = _p80._1;
+				var fx = f(x);
+				return (_elm_lang$core$Native_Utils.cmp(fx, _p81) > 0) ? {ctor: '_Tuple2', _0: x, _1: fx} : {ctor: '_Tuple2', _0: _p80._0, _1: _p81};
+			});
+		var _p82 = ls;
+		if (_p82.ctor === '::') {
+			if (_p82._1.ctor === '[]') {
+				return _elm_lang$core$Maybe$Just(_p82._0);
+			} else {
+				var _p83 = _p82._0;
+				return _elm_lang$core$Maybe$Just(
+					_elm_lang$core$Tuple$first(
+						A3(
+							_elm_lang$core$List$foldl,
+							maxBy,
+							{
+								ctor: '_Tuple2',
+								_0: _p83,
+								_1: f(_p83)
+							},
+							_p82._1)));
+			}
+		} else {
+			return _elm_lang$core$Maybe$Nothing;
+		}
+	});
+var _elm_community$list_extra$List_Extra$uncons = function (xs) {
+	var _p84 = xs;
+	if (_p84.ctor === '[]') {
+		return _elm_lang$core$Maybe$Nothing;
+	} else {
+		return _elm_lang$core$Maybe$Just(
+			{ctor: '_Tuple2', _0: _p84._0, _1: _p84._1});
+	}
+};
+var _elm_community$list_extra$List_Extra$swapAt = F3(
+	function (index1, index2, l) {
+		swapAt:
+		while (true) {
+			if (_elm_lang$core$Native_Utils.eq(index1, index2)) {
+				return _elm_lang$core$Maybe$Just(l);
+			} else {
+				if (_elm_lang$core$Native_Utils.cmp(index1, index2) > 0) {
+					var _v57 = index2,
+						_v58 = index1,
+						_v59 = l;
+					index1 = _v57;
+					index2 = _v58;
+					l = _v59;
+					continue swapAt;
+				} else {
+					if (_elm_lang$core$Native_Utils.cmp(index1, 0) < 0) {
+						return _elm_lang$core$Maybe$Nothing;
+					} else {
+						var _p85 = A2(_elm_community$list_extra$List_Extra$splitAt, index1, l);
+						var part1 = _p85._0;
+						var tail1 = _p85._1;
+						var _p86 = A2(_elm_community$list_extra$List_Extra$splitAt, index2 - index1, tail1);
+						var head2 = _p86._0;
+						var tail2 = _p86._1;
+						return A3(
+							_elm_lang$core$Maybe$map2,
+							F2(
+								function (_p88, _p87) {
+									var _p89 = _p88;
+									var _p90 = _p87;
+									return _elm_lang$core$List$concat(
+										{
+											ctor: '::',
+											_0: part1,
+											_1: {
+												ctor: '::',
+												_0: {ctor: '::', _0: _p90._0, _1: _p89._1},
+												_1: {
+													ctor: '::',
+													_0: {ctor: '::', _0: _p89._0, _1: _p90._1},
+													_1: {ctor: '[]'}
+												}
+											}
+										});
+								}),
+							_elm_community$list_extra$List_Extra$uncons(head2),
+							_elm_community$list_extra$List_Extra$uncons(tail2));
+					}
+				}
+			}
+		}
+	});
+var _elm_community$list_extra$List_Extra$iterate = F2(
+	function (f, x) {
+		var _p91 = f(x);
+		if (_p91.ctor === 'Just') {
+			return {
+				ctor: '::',
+				_0: x,
+				_1: A2(_elm_community$list_extra$List_Extra$iterate, f, _p91._0)
+			};
+		} else {
+			return {
+				ctor: '::',
+				_0: x,
+				_1: {ctor: '[]'}
+			};
+		}
+	});
+var _elm_community$list_extra$List_Extra$getAt = F2(
+	function (idx, xs) {
+		return (_elm_lang$core$Native_Utils.cmp(idx, 0) < 0) ? _elm_lang$core$Maybe$Nothing : _elm_lang$core$List$head(
+			A2(_elm_lang$core$List$drop, idx, xs));
+	});
+var _elm_community$list_extra$List_Extra_ops = _elm_community$list_extra$List_Extra_ops || {};
+_elm_community$list_extra$List_Extra_ops['!!'] = _elm_lang$core$Basics$flip(_elm_community$list_extra$List_Extra$getAt);
+var _elm_community$list_extra$List_Extra$init = function () {
+	var maybe = F2(
+		function (d, f) {
+			return function (_p92) {
+				return A2(
+					_elm_lang$core$Maybe$withDefault,
+					d,
+					A2(_elm_lang$core$Maybe$map, f, _p92));
+			};
+		});
+	return A2(
+		_elm_lang$core$List$foldr,
+		function (x) {
+			return function (_p93) {
+				return _elm_lang$core$Maybe$Just(
+					A3(
+						maybe,
+						{ctor: '[]'},
+						F2(
+							function (x, y) {
+								return {ctor: '::', _0: x, _1: y};
+							})(x),
+						_p93));
+			};
+		},
+		_elm_lang$core$Maybe$Nothing);
+}();
+var _elm_community$list_extra$List_Extra$last = _elm_community$list_extra$List_Extra$foldl1(
+	_elm_lang$core$Basics$flip(_elm_lang$core$Basics$always));
 var _elm_community$maybe_extra$Maybe_Extra$foldrValues = F2(
 	function (item, list) {
 		var _p0 = item;
@@ -10233,102 +12217,334 @@ var _elm_lang$html$Html_Events$Options = F2(
 	function (a, b) {
 		return {stopPropagation: a, preventDefault: b};
 	});
-var _user$project$Main$flipY = function (html) {
-	return A2(
-		_elm_lang$html$Html$div,
-		{
-			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$style(
-				{
+var _kintail$input_widget$Kintail_InputWidget$custom = F2(
+	function (_p0, value) {
+		var _p1 = _p0;
+		return A2(
+			_elm_lang$html$Html$map,
+			function (message) {
+				return A2(_p1.update, message, value);
+			},
+			_p1.view(value));
+	});
+var _kintail$input_widget$Kintail_InputWidget$slider = F3(
+	function (attributes, _p2, value) {
+		var _p3 = _p2;
+		var valueDecoder = A2(
+			_elm_lang$core$Json_Decode$map,
+			function (_p4) {
+				return A2(
+					_elm_lang$core$Result$withDefault,
+					value,
+					_elm_lang$core$String$toFloat(_p4));
+			},
+			_elm_lang$html$Html_Events$targetValue);
+		return A2(
+			_elm_lang$html$Html$input,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$type_('range'),
+				_1: {
 					ctor: '::',
-					_0: {ctor: '_Tuple2', _0: 'transform', _1: 'scaleY(-1)'},
+					_0: A2(
+						_elm_lang$html$Html_Attributes$property,
+						'min',
+						_elm_lang$core$Json_Encode$float(_p3.min)),
 					_1: {
 						ctor: '::',
-						_0: {ctor: '_Tuple2', _0: 'display', _1: 'inline-block'},
-						_1: {ctor: '[]'}
+						_0: A2(
+							_elm_lang$html$Html_Attributes$property,
+							'max',
+							_elm_lang$core$Json_Encode$float(_p3.max)),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html_Attributes$property,
+								'step',
+								_elm_lang$core$Json_Encode$float(_p3.step)),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html_Attributes$property,
+									'value',
+									_elm_lang$core$Json_Encode$float(value)),
+								_1: {
+									ctor: '::',
+									_0: A2(_elm_lang$html$Html_Events$on, 'input', valueDecoder),
+									_1: attributes
+								}
+							}
+						}
 					}
-				}),
-			_1: {ctor: '[]'}
-		},
-		{
-			ctor: '::',
-			_0: html,
-			_1: {ctor: '[]'}
-		});
-};
-var _user$project$Main$flipX = function (html) {
-	return A2(
-		_elm_lang$html$Html$div,
-		{
-			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$style(
+				}
+			},
+			{ctor: '[]'});
+	});
+var _kintail$input_widget$Kintail_InputWidget$comboBox = F3(
+	function (attributes, toStr, allItems) {
+		var selectedIndexDecoder = A2(
+			_elm_lang$core$Json_Decode$at,
+			{
+				ctor: '::',
+				_0: 'target',
+				_1: {
+					ctor: '::',
+					_0: 'selectedIndex',
+					_1: {ctor: '[]'}
+				}
+			},
+			_elm_lang$core$Json_Decode$int);
+		var itemsArray = _elm_lang$core$Array$fromList(allItems);
+		var newSelectionDecoder = function (currentItem) {
+			return A2(
+				_elm_lang$core$Json_Decode$andThen,
+				function (selectedIndex) {
+					var _p5 = A2(_elm_lang$core$Array$get, selectedIndex, itemsArray);
+					if (_p5.ctor === 'Just') {
+						var _p6 = _p5._0;
+						return (!_elm_lang$core$Native_Utils.eq(_p6, currentItem)) ? _elm_lang$core$Json_Decode$succeed(_p6) : _elm_lang$core$Json_Decode$fail('selected item did not change');
+					} else {
+						return _elm_lang$core$Json_Decode$fail('selected index out of range');
+					}
+				},
+				selectedIndexDecoder);
+		};
+		return function (currentItem) {
+			var toOption = function (item) {
+				return A2(
+					_elm_lang$html$Html$option,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$selected(
+							_elm_lang$core$Native_Utils.eq(item, currentItem)),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html$text(
+							toStr(item)),
+						_1: {ctor: '[]'}
+					});
+			};
+			var decoder = newSelectionDecoder(currentItem);
+			var onChange = A2(_elm_lang$html$Html_Events$on, 'change', decoder);
+			var onKeyUp = A2(_elm_lang$html$Html_Events$on, 'keyup', decoder);
+			return A2(
+				_elm_lang$html$Html$select,
 				{
 					ctor: '::',
-					_0: {ctor: '_Tuple2', _0: 'transform', _1: 'scaleX(-1)'},
-					_1: {
-						ctor: '::',
-						_0: {ctor: '_Tuple2', _0: 'display', _1: 'inline-block'},
-						_1: {ctor: '[]'}
-					}
-				}),
-			_1: {ctor: '[]'}
-		},
-		{
-			ctor: '::',
-			_0: html,
-			_1: {ctor: '[]'}
-		});
-};
-var _user$project$Main$rotateL = function (html) {
-	return A2(
-		_elm_lang$html$Html$div,
-		{
-			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$style(
-				{
+					_0: onChange,
+					_1: {ctor: '::', _0: onKeyUp, _1: attributes}
+				},
+				A2(_elm_lang$core$List$map, toOption, allItems));
+		};
+	});
+var _kintail$input_widget$Kintail_InputWidget$lineEdit = F2(
+	function (attributes, value) {
+		return A2(
+			_elm_lang$html$Html$input,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$value(value),
+				_1: {
 					ctor: '::',
-					_0: {ctor: '_Tuple2', _0: 'transform', _1: 'rotate(90deg)'},
-					_1: {
-						ctor: '::',
-						_0: {ctor: '_Tuple2', _0: 'display', _1: 'inline-block'},
-						_1: {ctor: '[]'}
-					}
-				}),
-			_1: {ctor: '[]'}
-		},
-		{
-			ctor: '::',
-			_0: html,
-			_1: {ctor: '[]'}
-		});
-};
-var _user$project$Main$rotateR = function (html) {
-	return A2(
-		_elm_lang$html$Html$div,
-		{
-			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$style(
-				{
+					_0: _elm_lang$html$Html_Events$onInput(_elm_lang$core$Basics$identity),
+					_1: attributes
+				}
+			},
+			{ctor: '[]'});
+	});
+var _kintail$input_widget$Kintail_InputWidget$radioButton = F3(
+	function (attributes, value, currentValue) {
+		return A2(
+			_elm_lang$html$Html$input,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$type_('radio'),
+				_1: {
 					ctor: '::',
-					_0: {ctor: '_Tuple2', _0: 'transform', _1: 'rotate(270deg)'},
+					_0: _elm_lang$html$Html_Attributes$checked(
+						_elm_lang$core$Native_Utils.eq(value, currentValue)),
 					_1: {
 						ctor: '::',
-						_0: {ctor: '_Tuple2', _0: 'display', _1: 'inline-block'},
-						_1: {ctor: '[]'}
+						_0: _elm_lang$html$Html_Events$onCheck(
+							_elm_lang$core$Basics$always(value)),
+						_1: attributes
 					}
-				}),
-			_1: {ctor: '[]'}
-		},
-		{
-			ctor: '::',
-			_0: html,
-			_1: {ctor: '[]'}
-		});
+				}
+			},
+			{ctor: '[]'});
+	});
+var _kintail$input_widget$Kintail_InputWidget$checkbox = F2(
+	function (attributes, value) {
+		return A2(
+			_elm_lang$html$Html$input,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$type_('checkbox'),
+				_1: {
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$checked(value),
+					_1: {
+						ctor: '::',
+						_0: _elm_lang$html$Html_Events$onCheck(_elm_lang$core$Basics$identity),
+						_1: attributes
+					}
+				}
+			},
+			{ctor: '[]'});
+	});
+var _user$project$Algebra$rot_l = {ctor: '_Tuple6', _0: 0, _1: -1, _2: 1, _3: 0, _4: 0, _5: 0};
+var _user$project$Algebra$rot_r = {ctor: '_Tuple6', _0: 0, _1: 1, _2: -1, _3: 0, _4: 0, _5: 0};
+var _user$project$Algebra$flip_y = {ctor: '_Tuple6', _0: 1, _1: 0, _2: 0, _3: -1, _4: 0, _5: 0};
+var _user$project$Algebra$flip_x = {ctor: '_Tuple6', _0: -1, _1: 0, _2: 0, _3: 1, _4: 0, _5: 0};
+var _user$project$Algebra$ident = {ctor: '_Tuple6', _0: 1, _1: 0, _2: 0, _3: 1, _4: 0, _5: 0};
+var _user$project$Algebra$show_transform = function (t) {
+	return _elm_lang$core$Native_Utils.eq(t, _user$project$Algebra$ident) ? 'ident' : (_elm_lang$core$Native_Utils.eq(t, _user$project$Algebra$flip_x) ? 'flip_x' : (_elm_lang$core$Native_Utils.eq(t, _user$project$Algebra$flip_y) ? 'flip_y' : (_elm_lang$core$Native_Utils.eq(t, _user$project$Algebra$rot_r) ? 'rot_r' : (_elm_lang$core$Native_Utils.eq(t, _user$project$Algebra$rot_l) ? 'rot_l' : _elm_lang$core$Basics$toString(t)))));
 };
-var _user$project$Main$board_size = 6;
-var _user$project$Main$slot_pixels = 20;
-var _user$project$Main$board_pixels = _user$project$Main$slot_pixels * _user$project$Main$board_size;
-var _user$project$Main$colorOf = function (side) {
+var _user$project$Algebra$transforms = {
+	ctor: '::',
+	_0: _user$project$Algebra$ident,
+	_1: {
+		ctor: '::',
+		_0: _user$project$Algebra$rot_r,
+		_1: {
+			ctor: '::',
+			_0: _user$project$Algebra$rot_l,
+			_1: {
+				ctor: '::',
+				_0: _user$project$Algebra$flip_x,
+				_1: {
+					ctor: '::',
+					_0: _user$project$Algebra$flip_y,
+					_1: {ctor: '[]'}
+				}
+			}
+		}
+	}
+};
+var _user$project$Algebra$gen_transform = A2(
+	_elm_lang$core$Random$map,
+	function (i) {
+		return A2(
+			_elm_community$maybe_extra$Maybe_Extra_ops['?'],
+			A2(_elm_community$list_extra$List_Extra_ops['!!'], _user$project$Algebra$transforms, i),
+			_user$project$Algebra$ident);
+	},
+	A2(
+		_elm_lang$core$Random$int,
+		0,
+		_elm_lang$core$List$length(_user$project$Algebra$transforms) - 1));
+var _user$project$Algebra$compose = F2(
+	function (_p1, _p0) {
+		var _p2 = _p1;
+		var _p11 = _p2._3;
+		var _p10 = _p2._2;
+		var _p9 = _p2._1;
+		var _p8 = _p2._0;
+		var _p3 = _p0;
+		var _p7 = _p3._3;
+		var _p6 = _p3._2;
+		var _p5 = _p3._1;
+		var _p4 = _p3._0;
+		return {ctor: '_Tuple6', _0: (_p8 * _p4) + (_p9 * _p5), _1: (_p8 * _p6) + (_p9 * _p7), _2: (_p10 * _p4) + (_p11 * _p5), _3: (_p10 * _p6) + (_p11 * _p7), _4: _p2._4 + _p3._4, _5: _p2._5 + _p3._5};
+	});
+var _user$project$Algebra_ops = _user$project$Algebra_ops || {};
+_user$project$Algebra_ops['***'] = _user$project$Algebra$compose;
+var _user$project$Algebra$to3x3 = function (_p12) {
+	var _p13 = _p12;
+	var _p17 = _p13.up;
+	var _p16 = _p13.right;
+	var _p15 = _p13.left;
+	var _p14 = _p13.down;
+	return {
+		ctor: '::',
+		_0: A2(_user$project$Algebra_ops['***'], _p17, _p15),
+		_1: {
+			ctor: '::',
+			_0: _p17,
+			_1: {
+				ctor: '::',
+				_0: A2(_user$project$Algebra_ops['***'], _p17, _p16),
+				_1: {
+					ctor: '::',
+					_0: _p15,
+					_1: {
+						ctor: '::',
+						_0: _user$project$Algebra$ident,
+						_1: {
+							ctor: '::',
+							_0: _p16,
+							_1: {
+								ctor: '::',
+								_0: A2(_user$project$Algebra_ops['***'], _p14, _p15),
+								_1: {
+									ctor: '::',
+									_0: _p14,
+									_1: {
+										ctor: '::',
+										_0: A2(_user$project$Algebra_ops['***'], _p14, _p16),
+										_1: {ctor: '[]'}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	};
+};
+var _user$project$Algebra$invert = function (_p18) {
+	var _p19 = _p18;
+	return {ctor: '_Tuple6', _0: _p19._0, _1: 0 - _p19._1, _2: 0 - _p19._2, _3: _p19._3, _4: 0 - _p19._4, _5: 0 - _p19._5};
+};
+var _user$project$Algebra$transform = F2(
+	function (_p21, _p20) {
+		var _p22 = _p21;
+		var _p23 = _p20;
+		var _p25 = _p23._1;
+		var _p24 = _p23._0;
+		return {ctor: '_Tuple2', _0: ((_p22._0 * _p24) + (_p22._1 * _p25)) + _p22._2, _1: ((_p22._3 * _p24) + (_p22._4 * _p25)) + _p22._5};
+	});
+var _user$project$Algebra$Lattice = F4(
+	function (a, b, c, d) {
+		return {right: a, down: b, left: c, up: d};
+	});
+var _user$project$Algebra$make_lattice = F4(
+	function (right, down, left, up) {
+		return (_elm_lang$core$Native_Utils.eq(
+			A2(_user$project$Algebra_ops['***'], right, up),
+			A2(_user$project$Algebra_ops['***'], up, right)) && (_elm_lang$core$Native_Utils.eq(
+			A2(_user$project$Algebra_ops['***'], left, up),
+			A2(_user$project$Algebra_ops['***'], up, left)) && (_elm_lang$core$Native_Utils.eq(
+			A2(_user$project$Algebra_ops['***'], right, down),
+			A2(_user$project$Algebra_ops['***'], down, right)) && _elm_lang$core$Native_Utils.eq(
+			A2(_user$project$Algebra_ops['***'], left, down),
+			A2(_user$project$Algebra_ops['***'], down, left))))) ? _elm_lang$core$Maybe$Just(
+			A4(_user$project$Algebra$Lattice, right, down, left, up)) : _elm_lang$core$Maybe$Nothing;
+	});
+var _user$project$Algebra$gen_lattice = function () {
+	var get = F2(
+		function (i, xs) {
+			return A2(
+				_elm_community$maybe_extra$Maybe_Extra_ops['?'],
+				A2(_elm_community$list_extra$List_Extra_ops['!!'], xs, i),
+				_user$project$Algebra$ident);
+		});
+	return A2(
+		_elm_lang$core$Random$map,
+		function (xs) {
+			return A4(
+				_user$project$Algebra$Lattice,
+				A2(get, 0, xs),
+				A2(get, 1, xs),
+				A2(get, 2, xs),
+				A2(get, 3, xs));
+		},
+		A2(_elm_lang$core$Random$list, 4, _user$project$Algebra$gen_transform));
+}();
+var _user$project$Gomoku$colorOf = function (side) {
 	var _p0 = side;
 	if (_p0.ctor === 'Black') {
 		return _elm_lang$core$Color$black;
@@ -10336,9 +12552,371 @@ var _user$project$Main$colorOf = function (side) {
 		return _elm_lang$core$Color$white;
 	}
 };
-var _user$project$Main$view_isxn = F3(
+var _user$project$Gomoku$move = F2(
+	function (_p2, _p1) {
+		var _p3 = _p2;
+		var _p8 = _p3._1;
+		var _p7 = _p3._0;
+		var _p4 = _p1;
+		var _p6 = _p4.size;
+		var _p5 = _p4.moves;
+		return ((!A2(
+			_elm_lang$core$List$member,
+			{ctor: '_Tuple2', _0: _p7, _1: _p8},
+			_p5)) && ((_elm_lang$core$Native_Utils.cmp(_p7, 0) > -1) && ((_elm_lang$core$Native_Utils.cmp(_p7, _p6) < 0) && ((_elm_lang$core$Native_Utils.cmp(_p8, 0) > -1) && (_elm_lang$core$Native_Utils.cmp(_p8, _p6) < 0))))) ? _elm_lang$core$Maybe$Just(
+			{
+				size: _p6,
+				moves: {
+					ctor: '::',
+					_0: {ctor: '_Tuple2', _0: _p7, _1: _p8},
+					_1: _p5
+				}
+			}) : _elm_lang$core$Maybe$Nothing;
+	});
+var _user$project$Gomoku$Board = F2(
+	function (a, b) {
+		return {size: a, moves: b};
+	});
+var _user$project$Gomoku$White = {ctor: 'White'};
+var _user$project$Gomoku$Black = {ctor: 'Black'};
+var _user$project$Gomoku$whose_turn = function (n) {
+	return _elm_lang$core$Native_Utils.eq(
+		A2(_elm_lang$core$Basics_ops['%'], n, 2),
+		0) ? _user$project$Gomoku$Black : _user$project$Gomoku$White;
+};
+var _user$project$Gomoku$other = function (side) {
+	var _p9 = side;
+	if (_p9.ctor === 'Black') {
+		return _user$project$Gomoku$White;
+	} else {
+		return _user$project$Gomoku$Black;
+	}
+};
+var _user$project$Model$Model = F3(
+	function (a, b, c) {
+		return {selection: a, lattice: b, board: c};
+	});
+var _user$project$Model$SetSize = function (a) {
+	return {ctor: 'SetSize', _0: a};
+};
+var _user$project$Model$SetLattice = function (a) {
+	return {ctor: 'SetLattice', _0: a};
+};
+var _user$project$Model$RandomLattice = function (a) {
+	return {ctor: 'RandomLattice', _0: a};
+};
+var _user$project$Model$Randomize = {ctor: 'Randomize'};
+var _user$project$Model$RandomMoves = function (a) {
+	return {ctor: 'RandomMoves', _0: a};
+};
+var _user$project$Model$Fill = {ctor: 'Fill'};
+var _user$project$Model$Clear = {ctor: 'Clear'};
+var _user$project$Model$Move = function (a) {
+	return {ctor: 'Move', _0: a};
+};
+var _user$project$Model$Select = function (a) {
+	return {ctor: 'Select', _0: a};
+};
+var _user$project$View$transform_html = F2(
+	function (xform, html) {
+		return A2(
+			_elm_lang$html$Html$div,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$style(
+					{
+						ctor: '::',
+						_0: {
+							ctor: '_Tuple2',
+							_0: 'transform',
+							_1: A2(
+								_elm_lang$core$Basics_ops['++'],
+								'matrix',
+								_elm_lang$core$Basics$toString(xform))
+						},
+						_1: {
+							ctor: '::',
+							_0: {ctor: '_Tuple2', _0: 'display', _1: 'inline-block'},
+							_1: {ctor: '[]'}
+						}
+					}),
+				_1: {ctor: '[]'}
+			},
+			{
+				ctor: '::',
+				_0: html,
+				_1: {ctor: '[]'}
+			});
+	});
+var _user$project$View$click = F3(
+	function (x, y, model) {
+		return function (_p0) {
+			return !A2(
+				_elm_lang$core$List$member,
+				{ctor: '_Tuple2', _0: x, _1: y},
+				_p0);
+		}(model.board.moves) ? _elm_lang$core$Maybe$Just(
+			_user$project$Model$Move(
+				{ctor: '_Tuple2', _0: x, _1: y})) : _elm_lang$core$Maybe$Nothing;
+	});
+var _user$project$View$hover = F3(
+	function (x, y, model) {
+		return function (_p1) {
+			return !A2(
+				_elm_lang$core$List$member,
+				{ctor: '_Tuple2', _0: x, _1: y},
+				_p1);
+		}(model.board.moves) ? _elm_lang$core$Maybe$Just(
+			_user$project$Model$Select(
+				_elm_lang$core$Maybe$Just(
+					{ctor: '_Tuple2', _0: x, _1: y}))) : A2(
+			_elm_lang$core$Maybe$map,
+			_elm_lang$core$Basics$always(
+				_user$project$Model$Select(_elm_lang$core$Maybe$Nothing)),
+			model.selection);
+	});
+var _user$project$View$box = _elm_lang$html$Html$div(
+	{
+		ctor: '::',
+		_0: _elm_lang$html$Html_Attributes$style(
+			{
+				ctor: '::',
+				_0: {ctor: '_Tuple2', _0: 'display', _1: 'inline-block'},
+				_1: {
+					ctor: '::',
+					_0: {ctor: '_Tuple2', _0: 'width', _1: '60px'},
+					_1: {ctor: '[]'}
+				}
+			}),
+		_1: {ctor: '[]'}
+	});
+var _user$project$View$view_transform = F2(
+	function (f, t) {
+		return _user$project$View$box(
+			{
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$map,
+					function (t) {
+						return _user$project$Model$SetLattice(
+							f(t));
+					},
+					A4(
+						_kintail$input_widget$Kintail_InputWidget$comboBox,
+						{ctor: '[]'},
+						_user$project$Algebra$show_transform,
+						_user$project$Algebra$transforms,
+						t)),
+				_1: {ctor: '[]'}
+			});
+	});
+var _user$project$View$view_config = function (_p2) {
+	var _p3 = _p2;
+	var _p6 = _p3.lattice;
+	var _p5 = _p3.board;
+	var _p4 = _p6;
+	return A2(
+		_elm_lang$html$Html$div,
+		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$div,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: _user$project$View$box(
+						{ctor: '[]'}),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_user$project$View$view_transform,
+							function (t) {
+								return _elm_lang$core$Native_Utils.update(
+									_p6,
+									{up: t});
+							},
+							_p4.up),
+						_1: {
+							ctor: '::',
+							_0: _user$project$View$box(
+								{ctor: '[]'}),
+							_1: {ctor: '[]'}
+						}
+					}
+				}),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$div,
+					{ctor: '[]'},
+					{
+						ctor: '::',
+						_0: A2(
+							_user$project$View$view_transform,
+							function (t) {
+								return _elm_lang$core$Native_Utils.update(
+									_p6,
+									{left: t});
+							},
+							_p4.left),
+						_1: {
+							ctor: '::',
+							_0: _user$project$View$box(
+								{ctor: '[]'}),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_user$project$View$view_transform,
+									function (t) {
+										return _elm_lang$core$Native_Utils.update(
+											_p6,
+											{right: t});
+									},
+									_p4.right),
+								_1: {ctor: '[]'}
+							}
+						}
+					}),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$div,
+						{ctor: '[]'},
+						{
+							ctor: '::',
+							_0: _user$project$View$box(
+								{ctor: '[]'}),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_user$project$View$view_transform,
+									function (t) {
+										return _elm_lang$core$Native_Utils.update(
+											_p6,
+											{down: t});
+									},
+									_p4.down),
+								_1: {
+									ctor: '::',
+									_0: _user$project$View$box(
+										{ctor: '[]'}),
+									_1: {ctor: '[]'}
+								}
+							}
+						}),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$div,
+							{ctor: '[]'},
+							{
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$button,
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$Randomize),
+										_1: {ctor: '[]'}
+									},
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text('randomize'),
+										_1: {ctor: '[]'}
+									}),
+								_1: {ctor: '[]'}
+							}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$div,
+								{ctor: '[]'},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text('size: '),
+									_1: {
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$input,
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html_Events$onInput(
+													function (s) {
+														return _user$project$Model$SetSize(
+															A2(
+																_elm_lang$core$Result$withDefault,
+																_p5.size,
+																_elm_lang$core$String$toInt(s)));
+													}),
+												_1: {
+													ctor: '::',
+													_0: _elm_lang$html$Html_Attributes$value(
+														_elm_lang$core$Basics$toString(_p5.size)),
+													_1: {
+														ctor: '::',
+														_0: _elm_lang$html$Html_Attributes$type_('number'),
+														_1: {
+															ctor: '::',
+															_0: A2(_elm_lang$html$Html_Attributes$attribute, 'min', '1'),
+															_1: {
+																ctor: '::',
+																_0: _elm_lang$html$Html_Attributes$style(
+																	{
+																		ctor: '::',
+																		_0: {ctor: '_Tuple2', _0: 'width', _1: '40px'},
+																		_1: {ctor: '[]'}
+																	}),
+																_1: {ctor: '[]'}
+															}
+														}
+													}
+												}
+											},
+											{ctor: '[]'}),
+										_1: {
+											ctor: '::',
+											_0: A2(
+												_elm_lang$html$Html$button,
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$Fill),
+													_1: {ctor: '[]'}
+												},
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html$text('fill'),
+													_1: {ctor: '[]'}
+												}),
+											_1: {
+												ctor: '::',
+												_0: A2(
+													_elm_lang$html$Html$button,
+													{
+														ctor: '::',
+														_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$Clear),
+														_1: {ctor: '[]'}
+													},
+													{
+														ctor: '::',
+														_0: _elm_lang$html$Html$text('clear'),
+														_1: {ctor: '[]'}
+													}),
+												_1: {ctor: '[]'}
+											}
+										}
+									}
+								}),
+							_1: {ctor: '[]'}
+						}
+					}
+				}
+			}
+		});
+};
+var _user$project$View$slot_pixels = 20;
+var _user$project$View$view_isxn = F3(
 	function (selected, sideToPlay, cell) {
-		var mid = _user$project$Main$slot_pixels / 2;
+		var mid = _user$project$View$slot_pixels / 2;
 		var dot = function (color) {
 			return A2(
 				_Kwarrtz$render$Graphics_Render$position,
@@ -10348,33 +12926,33 @@ var _user$project$Main$view_isxn = F3(
 					_Kwarrtz$render$Graphics_Render$solid(color),
 					_Kwarrtz$render$Graphics_Render$circle(mid)));
 		};
-		var end = _user$project$Main$slot_pixels;
+		var end = _user$project$View$slot_pixels;
 		var cross = A2(
 			_elm_lang$core$List$map,
-			A2(
-				_Kwarrtz$render$Graphics_Render$solidLine,
-				1,
-				_Kwarrtz$render$Graphics_Render$solid(_elm_lang$core$Color$black)),
-			A2(
-				_elm_lang$core$List$map,
-				_elm_lang$core$Basics$uncurry(_Kwarrtz$render$Graphics_Render$segment),
-				{
+			function (_p7) {
+				return A3(
+					_Kwarrtz$render$Graphics_Render$solidLine,
+					1,
+					_Kwarrtz$render$Graphics_Render$solid(_elm_lang$core$Color$black),
+					A2(_elm_lang$core$Basics$uncurry, _Kwarrtz$render$Graphics_Render$segment, _p7));
+			},
+			{
+				ctor: '::',
+				_0: {
+					ctor: '_Tuple2',
+					_0: {ctor: '_Tuple2', _0: mid, _1: 0},
+					_1: {ctor: '_Tuple2', _0: mid, _1: end}
+				},
+				_1: {
 					ctor: '::',
 					_0: {
 						ctor: '_Tuple2',
-						_0: {ctor: '_Tuple2', _0: mid, _1: 0},
-						_1: {ctor: '_Tuple2', _0: mid, _1: end}
+						_0: {ctor: '_Tuple2', _0: 0, _1: mid},
+						_1: {ctor: '_Tuple2', _0: end, _1: mid}
 					},
-					_1: {
-						ctor: '::',
-						_0: {
-							ctor: '_Tuple2',
-							_0: {ctor: '_Tuple2', _0: 0, _1: mid},
-							_1: {ctor: '_Tuple2', _0: end, _1: mid}
-						},
-						_1: {ctor: '[]'}
-					}
-				}));
+					_1: {ctor: '[]'}
+				}
+			});
 		return A5(
 			_Kwarrtz$render$Graphics_Render$svg,
 			0,
@@ -10388,7 +12966,7 @@ var _user$project$Main$view_isxn = F3(
 					selected ? {
 						ctor: '::',
 						_0: dot(
-							_user$project$Main$colorOf(sideToPlay)),
+							_user$project$Gomoku$colorOf(sideToPlay)),
 						_1: {ctor: '[]'}
 					} : A2(
 						_elm_lang$core$Basics_ops['++'],
@@ -10396,82 +12974,13 @@ var _user$project$Main$view_isxn = F3(
 						_elm_community$maybe_extra$Maybe_Extra$maybeToList(
 							A2(
 								_elm_lang$core$Maybe$map,
-								dot,
-								A2(_elm_lang$core$Maybe$map, _user$project$Main$colorOf, cell)))))));
+								function (_p8) {
+									return dot(
+										_user$project$Gomoku$colorOf(_p8));
+								},
+								cell))))));
 	});
-var _user$project$Main$Model = F3(
-	function (a, b, c) {
-		return {selection: a, board: b, side: c};
-	});
-var _user$project$Main$White = {ctor: 'White'};
-var _user$project$Main$Black = {ctor: 'Black'};
-var _user$project$Main$other = function (side) {
-	var _p1 = side;
-	if (_p1.ctor === 'Black') {
-		return _user$project$Main$White;
-	} else {
-		return _user$project$Main$Black;
-	}
-};
-var _user$project$Main$update = F2(
-	function (msg, model) {
-		var _p2 = msg;
-		if (_p2.ctor === 'Select') {
-			return _elm_lang$core$Native_Utils.update(
-				model,
-				{selection: _p2._0});
-		} else {
-			return _elm_lang$core$Native_Utils.update(
-				model,
-				{
-					selection: _elm_lang$core$Maybe$Nothing,
-					board: A3(
-						_chendrix$elm_matrix$Matrix$set,
-						{ctor: '_Tuple2', _0: _p2._0._0, _1: _p2._0._1},
-						_elm_lang$core$Maybe$Just(model.side),
-						model.board),
-					side: _user$project$Main$other(model.side)
-				});
-		}
-	});
-var _user$project$Main$Play = function (a) {
-	return {ctor: 'Play', _0: a};
-};
-var _user$project$Main$click = F3(
-	function (x, y, model) {
-		var _p3 = A2(
-			_chendrix$elm_matrix$Matrix$get,
-			{ctor: '_Tuple2', _0: x, _1: y},
-			model.board);
-		if ((_p3.ctor === 'Just') && (_p3._0.ctor === 'Nothing')) {
-			return _elm_lang$core$Maybe$Just(
-				_user$project$Main$Play(
-					{ctor: '_Tuple2', _0: x, _1: y}));
-		} else {
-			return _elm_lang$core$Maybe$Nothing;
-		}
-	});
-var _user$project$Main$Select = function (a) {
-	return {ctor: 'Select', _0: a};
-};
-var _user$project$Main$hover = F3(
-	function (x, y, model) {
-		var _p4 = A2(
-			_chendrix$elm_matrix$Matrix$get,
-			{ctor: '_Tuple2', _0: x, _1: y},
-			model.board);
-		if ((_p4.ctor === 'Just') && (_p4._0.ctor === 'Nothing')) {
-			return _elm_lang$core$Maybe$Just(
-				_user$project$Main$Select(
-					_elm_lang$core$Maybe$Just(
-						{ctor: '_Tuple2', _0: x, _1: y})));
-		} else {
-			return _elm_lang$core$Maybe$map(
-				_elm_lang$core$Basics$always(
-					_user$project$Main$Select(_elm_lang$core$Maybe$Nothing)))(model.selection);
-		}
-	});
-var _user$project$Main$view_board = function (model) {
+var _user$project$View$view_board = function (model) {
 	return A2(
 		_elm_lang$html$Html$div,
 		{
@@ -10517,41 +13026,55 @@ var _user$project$Main$view_board = function (model) {
 											A2(
 												_elm_lang$core$Maybe$map,
 												_elm_lang$html$Html_Events$onMouseEnter,
-												A3(_user$project$Main$hover, x, y, model))),
+												A3(_user$project$View$hover, x, y, model))),
 										_elm_community$maybe_extra$Maybe_Extra$maybeToList(
 											A2(
 												_elm_lang$core$Maybe$map,
 												_elm_lang$html$Html_Events$onMouseDown,
-												A3(_user$project$Main$click, x, y, model))))),
+												A3(_user$project$View$click, x, y, model))))),
 								{
 									ctor: '::',
 									_0: A3(
-										_user$project$Main$view_isxn,
+										_user$project$View$view_isxn,
 										_elm_lang$core$Native_Utils.eq(
 											model.selection,
 											_elm_lang$core$Maybe$Just(
 												{ctor: '_Tuple2', _0: x, _1: y})),
-										model.side,
-										_elm_community$maybe_extra$Maybe_Extra$join(
+										_user$project$Gomoku$whose_turn(
+											_elm_lang$core$List$length(model.board.moves)),
+										A2(
+											_elm_lang$core$Maybe$map,
+											_user$project$Gomoku$whose_turn,
 											A2(
-												_chendrix$elm_matrix$Matrix$get,
+												_elm_community$list_extra$List_Extra$elemIndex,
 												{ctor: '_Tuple2', _0: x, _1: y},
-												model.board))),
+												_elm_lang$core$List$reverse(model.board.moves)))),
 									_1: {ctor: '[]'}
 								});
 						},
-						A2(_elm_lang$core$List$range, 0, _user$project$Main$board_size - 1)));
+						A2(_elm_lang$core$List$range, 0, model.board.size - 1)));
 			},
-			A2(_elm_lang$core$List$range, 0, _user$project$Main$board_size - 1)));
+			A2(_elm_lang$core$List$range, 0, model.board.size - 1)));
 };
-var _user$project$Main$view = function (model) {
-	var board_html = _user$project$Main$view_board(model);
-	return A2(
+var _user$project$View$view = function (model) {
+	var config = _user$project$View$view_config(model);
+	var grid3x3 = A2(
+		_elm_lang$core$List$map,
+		F2(
+			function (x, y) {
+				return y(x);
+			})(
+			_user$project$View$view_board(model)),
+		A2(
+			_elm_lang$core$List$map,
+			_user$project$View$transform_html,
+			_user$project$Algebra$to3x3(model.lattice)));
+	var boards = A2(
 		_elm_lang$html$Html$div,
 		{
 			ctor: '::',
 			_0: _elm_lang$html$Html_Events$onMouseLeave(
-				_user$project$Main$Select(_elm_lang$core$Maybe$Nothing)),
+				_user$project$Model$Select(_elm_lang$core$Maybe$Nothing)),
 			_1: {
 				ctor: '::',
 				_0: _elm_lang$html$Html_Attributes$style(
@@ -10562,7 +13085,7 @@ var _user$project$Main$view = function (model) {
 							_0: 'width',
 							_1: A2(
 								_elm_lang$core$Basics_ops['++'],
-								_elm_lang$core$Basics$toString(_user$project$Main$board_pixels * 3),
+								_elm_lang$core$Basics$toString((model.board.size * _user$project$View$slot_pixels) * 3),
 								'px')
 						},
 						_1: {
@@ -10574,74 +13097,152 @@ var _user$project$Main$view = function (model) {
 				_1: {ctor: '[]'}
 			}
 		},
-		A2(
-			_elm_lang$core$List$map,
-			F2(
-				function (x, y) {
-					return y(x);
-				})(board_html),
-			{
+		grid3x3);
+	return A2(
+		_elm_lang$html$Html$div,
+		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: config,
+			_1: {
 				ctor: '::',
-				_0: function (_p5) {
-					return _user$project$Main$rotateL(
-						_user$project$Main$rotateL(_p5));
-				},
-				_1: {
-					ctor: '::',
-					_0: _user$project$Main$rotateL,
-					_1: {
-						ctor: '::',
-						_0: function (_p6) {
-							return _user$project$Main$rotateR(
-								_user$project$Main$rotateR(_p6));
-						},
-						_1: {
-							ctor: '::',
-							_0: _user$project$Main$rotateR,
-							_1: {
-								ctor: '::',
-								_0: _elm_lang$core$Basics$identity,
-								_1: {
-									ctor: '::',
-									_0: _user$project$Main$rotateR,
-									_1: {
-										ctor: '::',
-										_0: function (_p7) {
-											return _user$project$Main$rotateL(
-												_user$project$Main$rotateL(_p7));
-										},
-										_1: {
-											ctor: '::',
-											_0: _user$project$Main$rotateL,
-											_1: {
-												ctor: '::',
-												_0: function (_p8) {
-													return _user$project$Main$rotateR(
-														_user$project$Main$rotateR(_p8));
-												},
-												_1: {ctor: '[]'}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}));
+				_0: boards,
+				_1: {ctor: '[]'}
+			}
+		});
 };
-var _user$project$Main$main = _elm_lang$html$Html$beginnerProgram(
+var _user$project$Main$init = {
+	selection: _elm_lang$core$Maybe$Nothing,
+	lattice: A4(_user$project$Algebra$Lattice, _user$project$Algebra$ident, _user$project$Algebra$ident, _user$project$Algebra$ident, _user$project$Algebra$ident),
+	board: {
+		size: 7,
+		moves: {ctor: '[]'}
+	}
+};
+var _user$project$Main$random_moves = function (size) {
+	var gen_coord = A2(_elm_lang$core$Random$int, 0, size - 1);
+	return A2(
+		_elm_lang$core$Random$generate,
+		_user$project$Model$RandomMoves,
+		A2(_elm_lang$core$Random$pair, gen_coord, gen_coord));
+};
+var _user$project$Main$random_lattice = A2(_elm_lang$core$Random$generate, _user$project$Model$RandomLattice, _user$project$Algebra$gen_lattice);
+var _user$project$Main$update = F2(
+	function (msg, model) {
+		var _p0 = msg;
+		switch (_p0.ctor) {
+			case 'Select':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{selection: _p0._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'Move':
+				var _p1 = A2(
+					_user$project$Gomoku$move,
+					{ctor: '_Tuple2', _0: _p0._0._0, _1: _p0._0._1},
+					model.board);
+				if (_p1.ctor === 'Just') {
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{selection: _elm_lang$core$Maybe$Nothing, board: _p1._0}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				} else {
+					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+				}
+			case 'Clear':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							board: {
+								moves: {ctor: '[]'},
+								size: model.board.size
+							}
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'Fill':
+				return (_elm_lang$core$Native_Utils.cmp(
+					_elm_lang$core$List$length(model.board.moves),
+					model.board.size * model.board.size) < 0) ? {
+					ctor: '_Tuple2',
+					_0: model,
+					_1: _user$project$Main$random_moves(model.board.size)
+				} : {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							board: {
+								moves: {ctor: '[]'},
+								size: model.board.size
+							}
+						}),
+					_1: _user$project$Main$random_moves(model.board.size)
+				};
+			case 'RandomMoves':
+				return (_elm_lang$core$Native_Utils.cmp(
+					_elm_lang$core$List$length(model.board.moves),
+					model.board.size * model.board.size) < 0) ? {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Tuple$first(
+						A2(
+							_user$project$Main$update,
+							_user$project$Model$Move(
+								{ctor: '_Tuple2', _0: _p0._0._0, _1: _p0._0._1}),
+							model)),
+					_1: _user$project$Main$random_moves(model.board.size)
+				} : {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+			case 'Randomize':
+				return {ctor: '_Tuple2', _0: model, _1: _user$project$Main$random_lattice};
+			case 'RandomLattice':
+				var _p2 = A4(_user$project$Algebra$make_lattice, _p0._0.right, _p0._0.down, _p0._0.left, _p0._0.up);
+				if (_p2.ctor === 'Just') {
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{lattice: _p2._0}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				} else {
+					return {ctor: '_Tuple2', _0: model, _1: _user$project$Main$random_lattice};
+				}
+			case 'SetLattice':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{lattice: _p0._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			default:
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							board: {size: _p0._0, moves: model.board.moves}
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+		}
+	});
+var _user$project$Main$main = _elm_lang$html$Html$program(
 	{
-		model: {
-			selection: _elm_lang$core$Maybe$Nothing,
-			board: A2(
-				_chendrix$elm_matrix$Matrix$square,
-				_user$project$Main$board_size,
-				_elm_lang$core$Basics$always(_elm_lang$core$Maybe$Nothing)),
-			side: _user$project$Main$Black
-		},
-		view: _user$project$Main$view,
-		update: _user$project$Main$update
+		init: {ctor: '_Tuple2', _0: _user$project$Main$init, _1: _user$project$Main$random_lattice},
+		view: _user$project$View$view,
+		update: _user$project$Main$update,
+		subscriptions: function (model) {
+			return _elm_lang$core$Platform_Sub$none;
+		}
 	})();
 var Elm = {};
 Elm['Main'] = Elm['Main'] || {};

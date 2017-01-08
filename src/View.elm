@@ -2,14 +2,15 @@ module View exposing (view)
 
 import Color exposing (..)
 import Graphics.Render exposing (..)
-import Html exposing (Html, div, span)
-import Html.Attributes exposing (style)
-import Html.Events exposing (onMouseEnter, onMouseLeave, onMouseDown)
-import List exposing (range, map, concatMap, filter, member, length)
+import Html exposing (Html, div, span, text, button)
+import Html.Attributes exposing (style, value, type_, attribute)
+import Html.Events exposing (onMouseEnter, onMouseLeave, onMouseDown, onInput)
+import Kintail.InputWidget exposing (comboBox)
+import List exposing (range, map, concatMap, filter, member, length, reverse)
 import List.Extra exposing (elemIndex)
-import Maybe.Extra exposing (maybeToList, join)
+import Maybe.Extra exposing ((?), maybeToList, join)
 
-import Algebra exposing (Size, Transform, to3x3)
+import Algebra exposing (Size, Transform, Lattice, to3x3, transforms, show_transform)
 import Gomoku exposing (..)
 import Model exposing (Model, Msg(..))
 
@@ -24,14 +25,60 @@ view model =
                 |> to3x3
                 |> map transform_html
                 |> map ((|>) (view_board model))
-  in div
-    [ onMouseLeave (Select Nothing)
-    , style
-      [ ("width", toString (model.board.size * slot_pixels * 3) ++ "px")
-      , ("line-height", "0")
+      boards = div
+        [ onMouseLeave (Select Nothing)
+        , style
+          [ ("width", toString (model.board.size * slot_pixels * 3) ++ "px")
+          , ("line-height", "0")
+          ]
+        ] grid3x3
+      config = view_config model
+  in  div [] [ config, boards ]
+
+
+box : List (Html msg) -> Html msg
+box =
+  div [ style [("display", "inline-block"), ("width", "60px")] ]
+
+view_transform : (Transform -> Lattice) -> Transform -> Html Msg
+view_transform f t =
+  box [ comboBox [] show_transform transforms t
+        |> Html.map (\t -> SetLattice (f t))
       ]
-    ] grid3x3
-    
+
+
+view_config : Model -> Html Msg
+view_config { lattice, board } = case lattice of
+  { right, down, left, up } -> div []
+    [ div []
+      [ box []
+      , up |> view_transform (\t -> { lattice | up = t })
+      , box []
+      ]
+    , div []
+      [ left |> view_transform (\t -> { lattice | left = t })
+      , box []
+      , right |> view_transform (\t -> { lattice | right = t })
+      ]
+    , div []
+      [ box []
+      , down |> view_transform (\t -> { lattice | down = t })
+      , box []
+      ]
+    , div [] [ button [ Html.Events.onClick Randomize ] [ Html.text "randomize"] ]
+    , div []
+      [ Html.text "size: "
+      , Html.input
+        [ onInput (\s -> SetSize (String.toInt s |> Result.withDefault board.size))
+        , value (toString board.size)
+        , type_ "number"
+        , attribute "min" "1"
+        , style [ ("width", "40px") ]
+        ] []
+      , button [ Html.Events.onClick Fill ] [ Html.text "fill"]
+      , button [ Html.Events.onClick Clear ] [ Html.text "clear"]
+      ]
+    ]
 
 view_board : Model -> Html Msg
 view_board model =
@@ -51,7 +98,7 @@ view_board model =
             [ view_isxn
                 (model.selection == Just (x, y))
                 (model.board.moves |> length |> whose_turn)
-                (model.board.moves |> elemIndex (x, y) |> Maybe.map whose_turn)
+                (model.board.moves |> reverse |> elemIndex (x, y) |> Maybe.map whose_turn)
             ] ))))
 
 hover : Int -> Int -> Model -> Maybe Msg
@@ -63,7 +110,7 @@ hover x y model =
 
 click : Int -> Int -> Model -> Maybe Msg
 click x y model =
-  if model.board.moves |> member (x, y)
+  if model.board.moves |> not << member (x, y)
   then Just (Move (x, y))
   else Nothing
 
