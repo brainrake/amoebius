@@ -67,8 +67,7 @@ view_isxn selected sideToPlay cell =
 view_board : Model -> Html Msg
 view_board model =
   div
-    [ onMouseLeave (Select Nothing)
-    , style
+    [style
       [ ("background-color", "rgb(253, 226, 119)")
       , ("display", "inline-block")
       ]
@@ -104,7 +103,8 @@ view : Model -> Html Msg
 view model =
   let board_html = view_board model
   in div
-      [ style
+      [ onMouseLeave (Select Nothing)
+      , style
         [ ("width", toString (board_pixels * 3) ++ "px")
         , ("line-height", "0")
         ]
