@@ -109,11 +109,15 @@ view model =
         , ("line-height", "0")
         ]
       ]
-      ([ flipY >> flipX, flipX, flipY >> flipX
-      , flipY, identity, flipY
-      , flipY >> flipX, flipX, flipY >> flipX
+      ([rotateL >> rotateL, rotateL, rotateR >> rotateR
+      , rotateR, identity, rotateR
+      , rotateL >> rotateL, rotateL, rotateR >> rotateR
       ] |> List.map ((|>) board_html))
 
+rotateR : Html msg -> Html msg
+rotateR html = div [ style [ ("transform", "rotate(270deg)"), ("display", "inline-block") ] ] [ html ]
+rotateL : Html msg -> Html msg
+rotateL html = div [ style [ ("transform", "rotate(90deg)"), ("display", "inline-block") ] ] [ html ]
 flipX : Html msg -> Html msg
 flipX html = div [ style [ ("transform", "scaleX(-1)"), ("display", "inline-block") ] ] [ html ]
 flipY : Html msg -> Html msg
