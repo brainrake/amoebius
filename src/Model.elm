@@ -8,6 +8,7 @@ type alias Model =
   { selection : Maybe Coord
   , lattice : Lattice
   , board : Board
+  , show_hints : Bool
   }
 
 
@@ -21,3 +22,4 @@ type Msg =
   | RandomLattice Lattice
   | SetLattice Lattice
   | SetSize Int
+  | ToggleHints

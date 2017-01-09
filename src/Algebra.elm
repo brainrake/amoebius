@@ -20,6 +20,10 @@ type alias Lattice =
   }
 
 
+floatCoord : Coord -> (Float, Float)
+floatCoord (x, y) =
+  (toFloat x, toFloat y)
+
 transform : Transform -> Coord -> Coord
 transform (a, b, c, d, e, f) (x, y) =
   (a*x + b*y + c, d*x + e*y + f)
@@ -52,7 +56,7 @@ rot_r : Transform
 rot_r = (0, 1, -1, 0, 0, 0)
 
 rot_l : Transform
-rot_l  = (0, -1, 1, 0, 0, 0)
+rot_l = (0, -1, 1, 0, 0, 0)
 
 
 show_transform : Transform -> String
@@ -73,11 +77,12 @@ make_lattice right down left up =
   then Just (Lattice right down left up)
   else Nothing
 
-to3x3 : Lattice -> List Transform
+to3x3 : Lattice -> List (List Transform)
 to3x3 { right, down, left, up } =
-  [ up *** left   , up    , up *** right
-  , left          , ident , right
-  , down *** left , down  , down *** right ]
+  [ [ up *** left   , up    , up *** right   ]
+  , [ left          , ident , right          ]
+  , [ down *** left , down  , down *** right ]
+  ]
 
 
 transforms: List Transform

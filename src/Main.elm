@@ -21,6 +21,7 @@ init : Model
 init =
     { selection = Nothing
     , lattice = Lattice ident ident ident ident
+    , show_hints = False
     , board =
       { size = 7
       , moves = []
@@ -49,6 +50,8 @@ update msg model = case msg of
     Nothing -> (model, random_lattice)
   SetLattice lattice -> ({ model | lattice = lattice }, Cmd.none)
   SetSize size -> ({ model | board = { size = size, moves = model.board.moves } }, Cmd.none)
+  ToggleHints -> ({ model | show_hints = not model.show_hints }, Cmd.none)
+
 
 main : Program Never Model Msg
 main = Html.program

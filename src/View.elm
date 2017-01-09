@@ -7,56 +7,74 @@ import Html.Attributes exposing (style, value, type_, attribute)
 import Html.Events exposing (onMouseEnter, onMouseLeave, onMouseDown, onInput)
 import Json.Decode as J
 import Kintail.InputWidget exposing (comboBox)
-import List exposing (range, map, concatMap, filter, member, length, reverse, concat)
-import List.Extra exposing (elemIndex)
+import List exposing (range, map, concatMap, filter, member, length, reverse, concat, indexedMap, concatMap)
+import List.Extra exposing ((!!), elemIndex)
 import Maybe.Extra exposing ((?), maybeToList, join)
 
-import Algebra exposing (Size, Transform, Lattice, to3x3, transforms, show_transform)
+import Algebra exposing (Size, Transform, Lattice, to3x3, transform, transforms, show_transform, floatCoord, ident)
 import Gomoku exposing (..)
 import Model exposing (Model, Msg(..))
 
 
-slot_pixels : number
+slot_pixels : Int
 slot_pixels = 20
 
 
 view : Model -> Html Msg
 view model =
-  let grid3x3 = model.lattice
-                |> to3x3
-                |> map transform_html
-                |> map ((|>) (view_game model))
-      boards = div
-        [ onMouseLeave (Select Nothing)
-        , style
-          [ ("width", toString (model.board.size * slot_pixels * 3) ++ "px")
-          , ("line-height", "0")
-          ]
-        ] grid3x3
-      config = view_config model
-  in  div [] [ config, boards ]
-
-
-view_game : Model -> Html Msg
-view_game model =
-  div [ style [ ("display", "inline-block")
-              , ("position", "relative")
-              ]
+  let
+    board_pixels =
+      model.board.size * slot_pixels
+    transform_html (x, y) xform form =
+      div [ style [ ("display", "inline-block")
+                  , ("transform", "matrix" ++ toString xform) ] ]
+        [ svg (toFloat (x * board_pixels)) (toFloat (y * board_pixels)) (toFloat board_pixels) (toFloat board_pixels) <|
+            form
+        ]
+    grid3x3 =
+      to3x3 model.lattice
+      |> indexedMap (λx -> indexedMap (λy xform ->
+            group ( [ view_board model ]
+                    ++ (if model.show_hints then [ view_hints model ] else []) )
+            |> transform_html (x, y) xform
+         ) )
+    style_ =
+      style [ ("line-height", "0")
+            , ("width", toString (3 * board_pixels) ++ "px")
+            ]
+  in
+    div []
+      [ view_config model
+      , div [ onMouseLeave (Select Nothing), style_ ] <|
+          concat grid3x3
       ]
-      [ let board_pixels = toFloat model.board.size * slot_pixels
-        in svg 0 0 board_pixels board_pixels (view_board model)
-      ]
 
+view_hints : Model -> Form msg
+view_hints model =
+  let
+    end = toFloat (model.board.size * slot_pixels)
+    mid = end / 2
+  in
+    group
+      [ segment (0, 0) (end, 0) |> solidLine 4 (solid red)
+      , segment (mid, 0) (mid-10, 10) |> solidLine 4 (solid red)
+      , segment (0, 0) (0, end) |> solidLine 4 (solid blue)
+      , segment (0, mid) (10, mid+10) |> solidLine 4 (solid blue)
+      , segment (0, end) (end, end) |> solidLine 4 (solid brown)
+      , segment (mid, end) (mid+10, end-10) |> solidLine 4 (solid brown)
+      , segment (end, 0) (end, end) |> solidLine 4 (solid purple)
+      , segment (end, mid) (end-10, mid-10) |> solidLine 4 (solid purple)
+      ]
 
 box : List (Html msg) -> Html msg
 box =
-  div [ style [("display", "inline-block"), ("width", "60px")] ]
+  div [ style [ ("display", "inline-block"), ("width", "60px") ] ]
+
 
 view_transform : (Transform -> Lattice) -> Transform -> Html Msg
 view_transform f t =
   box [ comboBox [] show_transform transforms t
-        |> Html.map (\t -> SetLattice (f t))
-      ]
+        |> Html.map (\t -> SetLattice (f t)) ]
 
 
 view_config : Model -> Html Msg
@@ -89,8 +107,10 @@ view_config { lattice, board } = case lattice of
         ] []
       , button [ Html.Events.onClick Fill ] [ Html.text "fill"]
       , button [ Html.Events.onClick Clear ] [ Html.text "clear"]
+      , button [ Html.Events.onClick ToggleHints ] [ Html.text "hints"]
       ]
     ]
+
 
 view_board : Model -> Form Msg
 view_board model =
@@ -101,11 +121,10 @@ view_board model =
           (model.selection == Just (x, y))
           (whose_turn (length model.board.moves))
           (model.board.moves |> reverse |> elemIndex (x, y) |> Maybe.map whose_turn)
-        |> position (toFloat x * slot_pixels, toFloat y * slot_pixels)
+        |> position (toFloat (x * slot_pixels), toFloat (y * slot_pixels))
         |> on "mouseenter" (hover x y model)
         |> on "mousedown" (click x y model)
   ) ) )
-
 
 
 hover : Int -> Int -> Model -> J.Decoder Msg
@@ -121,11 +140,12 @@ click x y model =
   then J.succeed (Move (x, y))
   else J.fail "occupied"
 
+
 view_cell : Bool -> Side -> Maybe Side -> Form Msg
 view_cell selected sideToPlay cell =
   let
-    end = slot_pixels
-    mid = slot_pixels / 2
+    end = toFloat slot_pixels
+    mid = end / 2
     background =
       rectangle end end
       |> filled (solid (rgb 253 226 119))
@@ -144,9 +164,3 @@ view_cell selected sideToPlay cell =
     ++ cross
     ++ (if selected then [ dot (colorOf sideToPlay) ] else [])
     ++ (cell |> Maybe.map (\c -> dot (colorOf c)) |> maybeToList)
-
-
-
-transform_html : Transform -> Html msg -> Html msg
-transform_html xform html =
-  div [ style [ ("transform", "matrix" ++ toString xform), ("display", "inline-block") ] ] [ html ]
