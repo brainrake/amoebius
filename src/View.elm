@@ -5,8 +5,9 @@ import Graphics.Render exposing (..)
 import Html exposing (Html, div, span, text, button)
 import Html.Attributes exposing (style, value, type_, attribute)
 import Html.Events exposing (onMouseEnter, onMouseLeave, onMouseDown, onInput)
+import Json.Decode as J
 import Kintail.InputWidget exposing (comboBox)
-import List exposing (range, map, concatMap, filter, member, length, reverse)
+import List exposing (range, map, concatMap, filter, member, length, reverse, concat)
 import List.Extra exposing (elemIndex)
 import Maybe.Extra exposing ((?), maybeToList, join)
 
@@ -24,7 +25,7 @@ view model =
   let grid3x3 = model.lattice
                 |> to3x3
                 |> map transform_html
-                |> map ((|>) (view_board model))
+                |> map ((|>) (view_game model))
       boards = div
         [ onMouseLeave (Select Nothing)
         , style
@@ -34,6 +35,17 @@ view model =
         ] grid3x3
       config = view_config model
   in  div [] [ config, boards ]
+
+
+view_game : Model -> Html Msg
+view_game model =
+  div [ style [ ("display", "inline-block")
+              , ("position", "relative")
+              ]
+      ]
+      [ let board_pixels = toFloat model.board.size * slot_pixels
+        in svg 0 0 board_pixels board_pixels (view_board model)
+      ]
 
 
 box : List (Html msg) -> Html msg
@@ -80,59 +92,59 @@ view_config { lattice, board } = case lattice of
       ]
     ]
 
-view_board : Model -> Html Msg
+view_board : Model -> Form Msg
 view_board model =
-  div
-    [ style [ ("background-color", "rgb(253, 226, 119)")
-            , ("display", "inline-block")
-            ]
-    ]
-    (range 0 (model.board.size - 1) |> map (λx ->
-      div [] (
-        range 0 (model.board.size - 1) |> map (λy ->
-          div
-            ( [ style [ ("display", "inline-block") ] ]
-              ++ (hover x y model |> Maybe.map Html.Events.onMouseEnter|> maybeToList)
-              ++ (click x y model |> Maybe.map Html.Events.onMouseDown |> maybeToList)
-            )
-            [ view_isxn
-                (model.selection == Just (x, y))
-                (model.board.moves |> length |> whose_turn)
-                (model.board.moves |> reverse |> elemIndex (x, y) |> Maybe.map whose_turn)
-            ] ))))
+  group <| concat <| (
+    range 0 (model.board.size - 1) |> map (λx ->
+      range 0 (model.board.size - 1) |> map (λy ->
+        view_cell
+          (model.selection == Just (x, y))
+          (whose_turn (length model.board.moves))
+          (model.board.moves |> reverse |> elemIndex (x, y) |> Maybe.map whose_turn)
+        |> position (toFloat x * slot_pixels, toFloat y * slot_pixels)
+        |> on "mouseenter" (hover x y model)
+        |> on "mousedown" (click x y model)
+  ) ) )
 
-hover : Int -> Int -> Model -> Maybe Msg
+
+
+hover : Int -> Int -> Model -> J.Decoder Msg
 hover x y model =
   if model.board.moves |> not << member (x, y)
-  then Just (Select (Just (x, y)))
-  else model.selection |> Maybe.map (always (Select Nothing))
+  then J.succeed (Select (Just (x, y)))
+  else (model.selection |> Maybe.map (always (J.succeed (Select Nothing)))) ? J.fail "occupied"
 
 
-click : Int -> Int -> Model -> Maybe Msg
+click : Int -> Int -> Model -> J.Decoder Msg
 click x y model =
   if model.board.moves |> not << member (x, y)
-  then Just (Move (x, y))
-  else Nothing
+  then J.succeed (Move (x, y))
+  else J.fail "occupied"
 
-view_isxn : Bool -> Side -> Maybe Side -> Html Msg
-view_isxn selected sideToPlay cell =
+view_cell : Bool -> Side -> Maybe Side -> Form Msg
+view_cell selected sideToPlay cell =
   let
     end = slot_pixels
     mid = slot_pixels / 2
+    background =
+      rectangle end end
+      |> filled (solid (rgb 253 226 119))
+      |> position (mid, mid)
     cross =
       [ ((mid, 0), (mid, end))
       , ((0, mid), (end, mid))
-      ]
-      |> map (uncurry segment >> solidLine 1 (solid black))
-    dot color = circle (mid)
-          |> filled (solid (color))
-          |> position (mid, mid)
-  in svg 0 0 end end <|
-    group (
-      cross
-      ++ if selected then [ dot (colorOf sideToPlay) ] else []
-      ++ (cell |> Maybe.map (colorOf >> dot) |> maybeToList)
-    )
+      ] |> map (uncurry segment >> solidLine 1 (solid black))
+    dot color =
+      circle mid
+      |> filled (solid color)
+      |> opacity (if selected then (if color == black then 0.5 else 0.7) else 1)
+      |> position (mid, mid)
+  in group <|
+    [ background ]
+    ++ cross
+    ++ (if selected then [ dot (colorOf sideToPlay) ] else [])
+    ++ (cell |> Maybe.map (\c -> dot (colorOf c)) |> maybeToList)
+
 
 
 transform_html : Transform -> Html msg -> Html msg
