@@ -12459,38 +12459,50 @@ var _user$project$Algebra$to3x3 = function (_p12) {
 	var _p14 = _p13.down;
 	return {
 		ctor: '::',
-		_0: A2(_user$project$Algebra_ops['***'], _p17, _p15),
-		_1: {
+		_0: {
 			ctor: '::',
-			_0: _p17,
+			_0: A2(_user$project$Algebra_ops['***'], _p17, _p15),
 			_1: {
 				ctor: '::',
-				_0: A2(_user$project$Algebra_ops['***'], _p17, _p16),
+				_0: _p17,
 				_1: {
 					ctor: '::',
-					_0: _p15,
+					_0: A2(_user$project$Algebra_ops['***'], _p17, _p16),
+					_1: {ctor: '[]'}
+				}
+			}
+		},
+		_1: {
+			ctor: '::',
+			_0: {
+				ctor: '::',
+				_0: _p15,
+				_1: {
+					ctor: '::',
+					_0: _user$project$Algebra$ident,
 					_1: {
 						ctor: '::',
-						_0: _user$project$Algebra$ident,
-						_1: {
-							ctor: '::',
-							_0: _p16,
-							_1: {
-								ctor: '::',
-								_0: A2(_user$project$Algebra_ops['***'], _p14, _p15),
-								_1: {
-									ctor: '::',
-									_0: _p14,
-									_1: {
-										ctor: '::',
-										_0: A2(_user$project$Algebra_ops['***'], _p14, _p16),
-										_1: {ctor: '[]'}
-									}
-								}
-							}
-						}
+						_0: _p16,
+						_1: {ctor: '[]'}
 					}
 				}
+			},
+			_1: {
+				ctor: '::',
+				_0: {
+					ctor: '::',
+					_0: A2(_user$project$Algebra_ops['***'], _p14, _p15),
+					_1: {
+						ctor: '::',
+						_0: _p14,
+						_1: {
+							ctor: '::',
+							_0: A2(_user$project$Algebra_ops['***'], _p14, _p16),
+							_1: {ctor: '[]'}
+						}
+					}
+				},
+				_1: {ctor: '[]'}
 			}
 		}
 	};
@@ -12507,6 +12519,14 @@ var _user$project$Algebra$transform = F2(
 		var _p24 = _p23._0;
 		return {ctor: '_Tuple2', _0: ((_p22._0 * _p24) + (_p22._1 * _p25)) + _p22._2, _1: ((_p22._3 * _p24) + (_p22._4 * _p25)) + _p22._5};
 	});
+var _user$project$Algebra$floatCoord = function (_p26) {
+	var _p27 = _p26;
+	return {
+		ctor: '_Tuple2',
+		_0: _elm_lang$core$Basics$toFloat(_p27._0),
+		_1: _elm_lang$core$Basics$toFloat(_p27._1)
+	};
+};
 var _user$project$Algebra$Lattice = F4(
 	function (a, b, c, d) {
 		return {right: a, down: b, left: c, up: d};
@@ -12592,10 +12612,11 @@ var _user$project$Gomoku$other = function (side) {
 		return _user$project$Gomoku$Black;
 	}
 };
-var _user$project$Model$Model = F3(
-	function (a, b, c) {
-		return {selection: a, lattice: b, board: c};
+var _user$project$Model$Model = F4(
+	function (a, b, c, d) {
+		return {selection: a, lattice: b, board: c, show_hints: d};
 	});
+var _user$project$Model$ToggleHints = {ctor: 'ToggleHints'};
 var _user$project$Model$SetSize = function (a) {
 	return {ctor: 'SetSize', _0: a};
 };
@@ -12617,37 +12638,6 @@ var _user$project$Model$Move = function (a) {
 var _user$project$Model$Select = function (a) {
 	return {ctor: 'Select', _0: a};
 };
-var _user$project$View$transform_html = F2(
-	function (xform, html) {
-		return A2(
-			_elm_lang$html$Html$div,
-			{
-				ctor: '::',
-				_0: _elm_lang$html$Html_Attributes$style(
-					{
-						ctor: '::',
-						_0: {
-							ctor: '_Tuple2',
-							_0: 'transform',
-							_1: A2(
-								_elm_lang$core$Basics_ops['++'],
-								'matrix',
-								_elm_lang$core$Basics$toString(xform))
-						},
-						_1: {
-							ctor: '::',
-							_0: {ctor: '_Tuple2', _0: 'display', _1: 'inline-block'},
-							_1: {ctor: '[]'}
-						}
-					}),
-				_1: {ctor: '[]'}
-			},
-			{
-				ctor: '::',
-				_0: html,
-				_1: {ctor: '[]'}
-			});
-	});
 var _user$project$View$click = F3(
 	function (x, y, model) {
 		return function (_p0) {
@@ -12655,9 +12645,9 @@ var _user$project$View$click = F3(
 				_elm_lang$core$List$member,
 				{ctor: '_Tuple2', _0: x, _1: y},
 				_p0);
-		}(model.board.moves) ? _elm_lang$core$Maybe$Just(
+		}(model.board.moves) ? _elm_lang$core$Json_Decode$succeed(
 			_user$project$Model$Move(
-				{ctor: '_Tuple2', _0: x, _1: y})) : _elm_lang$core$Maybe$Nothing;
+				{ctor: '_Tuple2', _0: x, _1: y})) : _elm_lang$core$Json_Decode$fail('occupied');
 	});
 var _user$project$View$hover = F3(
 	function (x, y, model) {
@@ -12666,14 +12656,18 @@ var _user$project$View$hover = F3(
 				_elm_lang$core$List$member,
 				{ctor: '_Tuple2', _0: x, _1: y},
 				_p1);
-		}(model.board.moves) ? _elm_lang$core$Maybe$Just(
+		}(model.board.moves) ? _elm_lang$core$Json_Decode$succeed(
 			_user$project$Model$Select(
 				_elm_lang$core$Maybe$Just(
 					{ctor: '_Tuple2', _0: x, _1: y}))) : A2(
-			_elm_lang$core$Maybe$map,
-			_elm_lang$core$Basics$always(
-				_user$project$Model$Select(_elm_lang$core$Maybe$Nothing)),
-			model.selection);
+			_elm_community$maybe_extra$Maybe_Extra_ops['?'],
+			A2(
+				_elm_lang$core$Maybe$map,
+				_elm_lang$core$Basics$always(
+					_elm_lang$core$Json_Decode$succeed(
+						_user$project$Model$Select(_elm_lang$core$Maybe$Nothing))),
+				model.selection),
+			_elm_lang$core$Json_Decode$fail('occupied'));
 	});
 var _user$project$View$box = _elm_lang$html$Html$div(
 	{
@@ -12901,7 +12895,22 @@ var _user$project$View$view_config = function (_p2) {
 														_0: _elm_lang$html$Html$text('clear'),
 														_1: {ctor: '[]'}
 													}),
-												_1: {ctor: '[]'}
+												_1: {
+													ctor: '::',
+													_0: A2(
+														_elm_lang$html$Html$button,
+														{
+															ctor: '::',
+															_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$ToggleHints),
+															_1: {ctor: '[]'}
+														},
+														{
+															ctor: '::',
+															_0: _elm_lang$html$Html$text('hints'),
+															_1: {ctor: '[]'}
+														}),
+													_1: {ctor: '[]'}
+												}
 											}
 										}
 									}
@@ -12914,19 +12923,124 @@ var _user$project$View$view_config = function (_p2) {
 		});
 };
 var _user$project$View$slot_pixels = 20;
-var _user$project$View$view_isxn = F3(
+var _user$project$View$view_hints = function (model) {
+	var end = _elm_lang$core$Basics$toFloat(model.board.size * _user$project$View$slot_pixels);
+	var mid = end / 2;
+	return _Kwarrtz$render$Graphics_Render$group(
+		{
+			ctor: '::',
+			_0: A3(
+				_Kwarrtz$render$Graphics_Render$solidLine,
+				4,
+				_Kwarrtz$render$Graphics_Render$solid(_elm_lang$core$Color$red),
+				A2(
+					_Kwarrtz$render$Graphics_Render$segment,
+					{ctor: '_Tuple2', _0: 0, _1: 0},
+					{ctor: '_Tuple2', _0: end, _1: 0})),
+			_1: {
+				ctor: '::',
+				_0: A3(
+					_Kwarrtz$render$Graphics_Render$solidLine,
+					4,
+					_Kwarrtz$render$Graphics_Render$solid(_elm_lang$core$Color$red),
+					A2(
+						_Kwarrtz$render$Graphics_Render$segment,
+						{ctor: '_Tuple2', _0: mid, _1: 0},
+						{ctor: '_Tuple2', _0: mid - 10, _1: 10})),
+				_1: {
+					ctor: '::',
+					_0: A3(
+						_Kwarrtz$render$Graphics_Render$solidLine,
+						4,
+						_Kwarrtz$render$Graphics_Render$solid(_elm_lang$core$Color$blue),
+						A2(
+							_Kwarrtz$render$Graphics_Render$segment,
+							{ctor: '_Tuple2', _0: 0, _1: 0},
+							{ctor: '_Tuple2', _0: 0, _1: end})),
+					_1: {
+						ctor: '::',
+						_0: A3(
+							_Kwarrtz$render$Graphics_Render$solidLine,
+							4,
+							_Kwarrtz$render$Graphics_Render$solid(_elm_lang$core$Color$blue),
+							A2(
+								_Kwarrtz$render$Graphics_Render$segment,
+								{ctor: '_Tuple2', _0: 0, _1: mid},
+								{ctor: '_Tuple2', _0: 10, _1: mid + 10})),
+						_1: {
+							ctor: '::',
+							_0: A3(
+								_Kwarrtz$render$Graphics_Render$solidLine,
+								4,
+								_Kwarrtz$render$Graphics_Render$solid(_elm_lang$core$Color$brown),
+								A2(
+									_Kwarrtz$render$Graphics_Render$segment,
+									{ctor: '_Tuple2', _0: 0, _1: end},
+									{ctor: '_Tuple2', _0: end, _1: end})),
+							_1: {
+								ctor: '::',
+								_0: A3(
+									_Kwarrtz$render$Graphics_Render$solidLine,
+									4,
+									_Kwarrtz$render$Graphics_Render$solid(_elm_lang$core$Color$brown),
+									A2(
+										_Kwarrtz$render$Graphics_Render$segment,
+										{ctor: '_Tuple2', _0: mid, _1: end},
+										{ctor: '_Tuple2', _0: mid + 10, _1: end - 10})),
+								_1: {
+									ctor: '::',
+									_0: A3(
+										_Kwarrtz$render$Graphics_Render$solidLine,
+										4,
+										_Kwarrtz$render$Graphics_Render$solid(_elm_lang$core$Color$purple),
+										A2(
+											_Kwarrtz$render$Graphics_Render$segment,
+											{ctor: '_Tuple2', _0: end, _1: 0},
+											{ctor: '_Tuple2', _0: end, _1: end})),
+									_1: {
+										ctor: '::',
+										_0: A3(
+											_Kwarrtz$render$Graphics_Render$solidLine,
+											4,
+											_Kwarrtz$render$Graphics_Render$solid(_elm_lang$core$Color$purple),
+											A2(
+												_Kwarrtz$render$Graphics_Render$segment,
+												{ctor: '_Tuple2', _0: end, _1: mid},
+												{ctor: '_Tuple2', _0: end - 10, _1: mid - 10})),
+										_1: {ctor: '[]'}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		});
+};
+var _user$project$View$view_cell = F3(
 	function (selected, sideToPlay, cell) {
-		var mid = _user$project$View$slot_pixels / 2;
+		var end = _elm_lang$core$Basics$toFloat(_user$project$View$slot_pixels);
+		var mid = end / 2;
 		var dot = function (color) {
 			return A2(
 				_Kwarrtz$render$Graphics_Render$position,
 				{ctor: '_Tuple2', _0: mid, _1: mid},
 				A2(
-					_Kwarrtz$render$Graphics_Render$filled,
-					_Kwarrtz$render$Graphics_Render$solid(color),
-					_Kwarrtz$render$Graphics_Render$circle(mid)));
+					_Kwarrtz$render$Graphics_Render$opacity,
+					selected ? (_elm_lang$core$Native_Utils.eq(color, _elm_lang$core$Color$black) ? 0.5 : 0.7) : 1,
+					A2(
+						_Kwarrtz$render$Graphics_Render$filled,
+						_Kwarrtz$render$Graphics_Render$solid(color),
+						_Kwarrtz$render$Graphics_Render$circle(mid))));
 		};
-		var end = _user$project$View$slot_pixels;
+		var background = A2(
+			_Kwarrtz$render$Graphics_Render$position,
+			{ctor: '_Tuple2', _0: mid, _1: mid},
+			A2(
+				_Kwarrtz$render$Graphics_Render$filled,
+				_Kwarrtz$render$Graphics_Render$solid(
+					A3(_elm_lang$core$Color$rgb, 253, 226, 119)),
+				A2(_Kwarrtz$render$Graphics_Render$rectangle, end, end)));
 		var cross = A2(
 			_elm_lang$core$List$map,
 			function (_p7) {
@@ -12953,160 +13067,182 @@ var _user$project$View$view_isxn = F3(
 					_1: {ctor: '[]'}
 				}
 			});
-		return A5(
-			_Kwarrtz$render$Graphics_Render$svg,
-			0,
-			0,
-			end,
-			end,
-			_Kwarrtz$render$Graphics_Render$group(
+		return _Kwarrtz$render$Graphics_Render$group(
+			A2(
+				_elm_lang$core$Basics_ops['++'],
+				{
+					ctor: '::',
+					_0: background,
+					_1: {ctor: '[]'}
+				},
 				A2(
 					_elm_lang$core$Basics_ops['++'],
 					cross,
-					selected ? {
-						ctor: '::',
-						_0: dot(
-							_user$project$Gomoku$colorOf(sideToPlay)),
-						_1: {ctor: '[]'}
-					} : A2(
+					A2(
 						_elm_lang$core$Basics_ops['++'],
-						{ctor: '[]'},
+						selected ? {
+							ctor: '::',
+							_0: dot(
+								_user$project$Gomoku$colorOf(sideToPlay)),
+							_1: {ctor: '[]'}
+						} : {ctor: '[]'},
 						_elm_community$maybe_extra$Maybe_Extra$maybeToList(
 							A2(
 								_elm_lang$core$Maybe$map,
-								function (_p8) {
+								function (c) {
 									return dot(
-										_user$project$Gomoku$colorOf(_p8));
+										_user$project$Gomoku$colorOf(c));
 								},
 								cell))))));
 	});
 var _user$project$View$view_board = function (model) {
-	return A2(
-		_elm_lang$html$Html$div,
-		{
-			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$style(
-				{
-					ctor: '::',
-					_0: {ctor: '_Tuple2', _0: 'background-color', _1: 'rgb(253, 226, 119)'},
-					_1: {
-						ctor: '::',
-						_0: {ctor: '_Tuple2', _0: 'display', _1: 'inline-block'},
-						_1: {ctor: '[]'}
-					}
-				}),
-			_1: {ctor: '[]'}
-		},
-		A2(
-			_elm_lang$core$List$map,
-			function (x) {
-				return A2(
-					_elm_lang$html$Html$div,
-					{ctor: '[]'},
-					A2(
+	return _Kwarrtz$render$Graphics_Render$group(
+		_elm_lang$core$List$concat(
+			A2(
+				_elm_lang$core$List$map,
+				function (x) {
+					return A2(
 						_elm_lang$core$List$map,
 						function (y) {
-							return A2(
-								_elm_lang$html$Html$div,
+							return A3(
+								_Kwarrtz$render$Graphics_Render$on,
+								'mousedown',
+								A3(_user$project$View$click, x, y, model),
+								A3(
+									_Kwarrtz$render$Graphics_Render$on,
+									'mouseenter',
+									A3(_user$project$View$hover, x, y, model),
+									A2(
+										_Kwarrtz$render$Graphics_Render$position,
+										{
+											ctor: '_Tuple2',
+											_0: _elm_lang$core$Basics$toFloat(x * _user$project$View$slot_pixels),
+											_1: _elm_lang$core$Basics$toFloat(y * _user$project$View$slot_pixels)
+										},
+										A3(
+											_user$project$View$view_cell,
+											_elm_lang$core$Native_Utils.eq(
+												model.selection,
+												_elm_lang$core$Maybe$Just(
+													{ctor: '_Tuple2', _0: x, _1: y})),
+											_user$project$Gomoku$whose_turn(
+												_elm_lang$core$List$length(model.board.moves)),
+											A2(
+												_elm_lang$core$Maybe$map,
+												_user$project$Gomoku$whose_turn,
+												A2(
+													_elm_community$list_extra$List_Extra$elemIndex,
+													{ctor: '_Tuple2', _0: x, _1: y},
+													_elm_lang$core$List$reverse(model.board.moves)))))));
+						},
+						A2(_elm_lang$core$List$range, 0, model.board.size - 1));
+				},
+				A2(_elm_lang$core$List$range, 0, model.board.size - 1))));
+};
+var _user$project$View$view = function (model) {
+	var board_pixels = model.board.size * _user$project$View$slot_pixels;
+	var transform_html = F3(
+		function (_p8, xform, form) {
+			var _p9 = _p8;
+			return A2(
+				_elm_lang$html$Html$div,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$style(
+						{
+							ctor: '::',
+							_0: {ctor: '_Tuple2', _0: 'display', _1: 'inline-block'},
+							_1: {
+								ctor: '::',
+								_0: {
+									ctor: '_Tuple2',
+									_0: 'transform',
+									_1: A2(
+										_elm_lang$core$Basics_ops['++'],
+										'matrix',
+										_elm_lang$core$Basics$toString(xform))
+								},
+								_1: {ctor: '[]'}
+							}
+						}),
+					_1: {ctor: '[]'}
+				},
+				{
+					ctor: '::',
+					_0: A5(
+						_Kwarrtz$render$Graphics_Render$svg,
+						_elm_lang$core$Basics$toFloat(_p9._0 * board_pixels),
+						_elm_lang$core$Basics$toFloat(_p9._1 * board_pixels),
+						_elm_lang$core$Basics$toFloat(board_pixels),
+						_elm_lang$core$Basics$toFloat(board_pixels),
+						form),
+					_1: {ctor: '[]'}
+				});
+		});
+	var grid3x3 = A2(
+		_elm_lang$core$List$indexedMap,
+		function (x) {
+			return _elm_lang$core$List$indexedMap(
+				F2(
+					function (y, xform) {
+						return A3(
+							transform_html,
+							{ctor: '_Tuple2', _0: x, _1: y},
+							xform,
+							_Kwarrtz$render$Graphics_Render$group(
 								A2(
 									_elm_lang$core$Basics_ops['++'],
 									{
 										ctor: '::',
-										_0: _elm_lang$html$Html_Attributes$style(
-											{
-												ctor: '::',
-												_0: {ctor: '_Tuple2', _0: 'display', _1: 'inline-block'},
-												_1: {ctor: '[]'}
-											}),
+										_0: _user$project$View$view_board(model),
 										_1: {ctor: '[]'}
 									},
-									A2(
-										_elm_lang$core$Basics_ops['++'],
-										_elm_community$maybe_extra$Maybe_Extra$maybeToList(
-											A2(
-												_elm_lang$core$Maybe$map,
-												_elm_lang$html$Html_Events$onMouseEnter,
-												A3(_user$project$View$hover, x, y, model))),
-										_elm_community$maybe_extra$Maybe_Extra$maybeToList(
-											A2(
-												_elm_lang$core$Maybe$map,
-												_elm_lang$html$Html_Events$onMouseDown,
-												A3(_user$project$View$click, x, y, model))))),
-								{
-									ctor: '::',
-									_0: A3(
-										_user$project$View$view_isxn,
-										_elm_lang$core$Native_Utils.eq(
-											model.selection,
-											_elm_lang$core$Maybe$Just(
-												{ctor: '_Tuple2', _0: x, _1: y})),
-										_user$project$Gomoku$whose_turn(
-											_elm_lang$core$List$length(model.board.moves)),
-										A2(
-											_elm_lang$core$Maybe$map,
-											_user$project$Gomoku$whose_turn,
-											A2(
-												_elm_community$list_extra$List_Extra$elemIndex,
-												{ctor: '_Tuple2', _0: x, _1: y},
-												_elm_lang$core$List$reverse(model.board.moves)))),
-									_1: {ctor: '[]'}
-								});
-						},
-						A2(_elm_lang$core$List$range, 0, model.board.size - 1)));
-			},
-			A2(_elm_lang$core$List$range, 0, model.board.size - 1)));
-};
-var _user$project$View$view = function (model) {
-	var config = _user$project$View$view_config(model);
-	var grid3x3 = A2(
-		_elm_lang$core$List$map,
-		F2(
-			function (x, y) {
-				return y(x);
-			})(
-			_user$project$View$view_board(model)),
-		A2(
-			_elm_lang$core$List$map,
-			_user$project$View$transform_html,
-			_user$project$Algebra$to3x3(model.lattice)));
-	var boards = A2(
-		_elm_lang$html$Html$div,
+									model.show_hints ? {
+										ctor: '::',
+										_0: _user$project$View$view_hints(model),
+										_1: {ctor: '[]'}
+									} : {ctor: '[]'})));
+					}));
+		},
+		_user$project$Algebra$to3x3(model.lattice));
+	var style_ = _elm_lang$html$Html_Attributes$style(
 		{
 			ctor: '::',
-			_0: _elm_lang$html$Html_Events$onMouseLeave(
-				_user$project$Model$Select(_elm_lang$core$Maybe$Nothing)),
+			_0: {ctor: '_Tuple2', _0: 'line-height', _1: '0'},
 			_1: {
 				ctor: '::',
-				_0: _elm_lang$html$Html_Attributes$style(
-					{
-						ctor: '::',
-						_0: {
-							ctor: '_Tuple2',
-							_0: 'width',
-							_1: A2(
-								_elm_lang$core$Basics_ops['++'],
-								_elm_lang$core$Basics$toString((model.board.size * _user$project$View$slot_pixels) * 3),
-								'px')
-						},
-						_1: {
-							ctor: '::',
-							_0: {ctor: '_Tuple2', _0: 'line-height', _1: '0'},
-							_1: {ctor: '[]'}
-						}
-					}),
+				_0: {
+					ctor: '_Tuple2',
+					_0: 'width',
+					_1: A2(
+						_elm_lang$core$Basics_ops['++'],
+						_elm_lang$core$Basics$toString(3 * board_pixels),
+						'px')
+				},
 				_1: {ctor: '[]'}
 			}
-		},
-		grid3x3);
+		});
 	return A2(
 		_elm_lang$html$Html$div,
 		{ctor: '[]'},
 		{
 			ctor: '::',
-			_0: config,
+			_0: _user$project$View$view_config(model),
 			_1: {
 				ctor: '::',
-				_0: boards,
+				_0: A2(
+					_elm_lang$html$Html$div,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Events$onMouseLeave(
+							_user$project$Model$Select(_elm_lang$core$Maybe$Nothing)),
+						_1: {
+							ctor: '::',
+							_0: style_,
+							_1: {ctor: '[]'}
+						}
+					},
+					_elm_lang$core$List$concat(grid3x3)),
 				_1: {ctor: '[]'}
 			}
 		});
@@ -13114,6 +13250,7 @@ var _user$project$View$view = function (model) {
 var _user$project$Main$init = {
 	selection: _elm_lang$core$Maybe$Nothing,
 	lattice: A4(_user$project$Algebra$Lattice, _user$project$Algebra$ident, _user$project$Algebra$ident, _user$project$Algebra$ident, _user$project$Algebra$ident),
+	show_hints: false,
 	board: {
 		size: 7,
 		moves: {ctor: '[]'}
@@ -13223,7 +13360,7 @@ var _user$project$Main$update = F2(
 						{lattice: _p0._0}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
-			default:
+			case 'SetSize':
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
@@ -13231,6 +13368,14 @@ var _user$project$Main$update = F2(
 						{
 							board: {size: _p0._0, moves: model.board.moves}
 						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			default:
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{show_hints: !model.show_hints}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 		}
