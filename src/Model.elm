@@ -1,25 +1,32 @@
-module Model exposing (Model, Msg(..))
+module Model exposing (..)
 
 import Algebra exposing (Coord, Lattice)
 import Gomoku exposing (Board)
 
 
 type alias Model =
-  { selection : Maybe Coord
-  , lattice : Lattice
-  , board : Board
-  , show_hints : Bool
-  }
+    { selection : Maybe Coord
+    , lattice : Lattice
+    , board : Board
+    , show_hints : Bool
+    , num_players : NumPlayers
+    }
 
 
-type Msg =
-    Select (Maybe Coord)
-  | Move Coord
-  | Clear
-  | Fill
-  | RandomMoves Coord
-  | Randomize
-  | RandomLattice Lattice
-  | SetLattice Lattice
-  | SetSize Int
-  | ToggleHints
+type NumPlayers
+    = TwoPlayers
+    | ThreePlayers
+
+
+type Msg
+    = Select (Maybe Coord)
+    | Move Coord
+    | Clear
+    | Fill
+    | RandomMoves Coord
+    | Randomize
+    | RandomLattice Lattice
+    | SetLattice Lattice
+    | SetSize Int
+    | ToggleHints
+    | ChangeNumPlayers NumPlayers
