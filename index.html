@@ -1563,8 +1563,7 @@ function toString(v)
 	var type = typeof v;
 	if (type === 'function')
 	{
-		var name = v.func ? v.func.name : v.name;
-		return '<function' + (name === '' ? '' : ':') + name + '>';
+		return '<function>';
 	}
 
 	if (type === 'boolean')
@@ -2067,6 +2066,13 @@ return {
 var _elm_lang$core$List$sortBy = _elm_lang$core$Native_List.sortBy;
 var _elm_lang$core$List$sort = function (xs) {
 	return A2(_elm_lang$core$List$sortBy, _elm_lang$core$Basics$identity, xs);
+};
+var _elm_lang$core$List$singleton = function (value) {
+	return {
+		ctor: '::',
+		_0: value,
+		_1: {ctor: '[]'}
+	};
 };
 var _elm_lang$core$List$drop = F2(
 	function (n, list) {
@@ -2883,7 +2889,7 @@ function endsWith(sub, str)
 function indexes(sub, str)
 {
 	var subLen = sub.length;
-	
+
 	if (subLen < 1)
 	{
 		return _elm_lang$core$Native_List.Nil;
@@ -2896,74 +2902,78 @@ function indexes(sub, str)
 	{
 		is.push(i);
 		i = i + subLen;
-	}	
-	
+	}
+
 	return _elm_lang$core$Native_List.fromArray(is);
 }
+
 
 function toInt(s)
 {
 	var len = s.length;
+
+	// if empty
 	if (len === 0)
 	{
-		return _elm_lang$core$Result$Err("could not convert string '" + s + "' to an Int" );
+		return intErr(s);
 	}
-	var start = 0;
-	if (s[0] === '-')
+
+	// if hex
+	var c = s[0];
+	if (c === '0' && s[1] === 'x')
 	{
-		if (len === 1)
+		for (var i = 2; i < len; ++i)
 		{
-			return _elm_lang$core$Result$Err("could not convert string '" + s + "' to an Int" );
+			var c = s[i];
+			if (('0' <= c && c <= '9') || ('A' <= c && c <= 'F') || ('a' <= c && c <= 'f'))
+			{
+				continue;
+			}
+			return intErr(s);
 		}
-		start = 1;
+		return _elm_lang$core$Result$Ok(parseInt(s, 16));
 	}
-	for (var i = start; i < len; ++i)
+
+	// is decimal
+	if (c > '9' || (c < '0' && c !== '-' && c !== '+'))
+	{
+		return intErr(s);
+	}
+	for (var i = 1; i < len; ++i)
 	{
 		var c = s[i];
 		if (c < '0' || '9' < c)
 		{
-			return _elm_lang$core$Result$Err("could not convert string '" + s + "' to an Int" );
+			return intErr(s);
 		}
 	}
+
 	return _elm_lang$core$Result$Ok(parseInt(s, 10));
 }
 
+function intErr(s)
+{
+	return _elm_lang$core$Result$Err("could not convert string '" + s + "' to an Int");
+}
+
+
 function toFloat(s)
 {
-	var len = s.length;
-	if (len === 0)
+	// check if it is a hex, octal, or binary number
+	if (s.length === 0 || /[\sxbo]/.test(s))
 	{
-		return _elm_lang$core$Result$Err("could not convert string '" + s + "' to a Float" );
+		return floatErr(s);
 	}
-	var start = 0;
-	if (s[0] === '-')
-	{
-		if (len === 1)
-		{
-			return _elm_lang$core$Result$Err("could not convert string '" + s + "' to a Float" );
-		}
-		start = 1;
-	}
-	var dotCount = 0;
-	for (var i = start; i < len; ++i)
-	{
-		var c = s[i];
-		if ('0' <= c && c <= '9')
-		{
-			continue;
-		}
-		if (c === '.')
-		{
-			dotCount += 1;
-			if (dotCount <= 1)
-			{
-				continue;
-			}
-		}
-		return _elm_lang$core$Result$Err("could not convert string '" + s + "' to a Float" );
-	}
-	return _elm_lang$core$Result$Ok(parseFloat(s));
+	var n = +s;
+	// faster isNaN check
+	return n === n ? _elm_lang$core$Result$Ok(n) : floatErr(s);
 }
+
+function floatErr(s)
+{
+	return _elm_lang$core$Result$Err("could not convert string '" + s + "' to a Float");
+}
+
 
 function toList(str)
 {
@@ -4393,11 +4403,6 @@ function badToString(problem)
 				problem = problem.rest;
 				break;
 
-			case 'index':
-				context += '[' + problem.index + ']';
-				problem = problem.rest;
-				break;
-
 			case 'oneOf':
 				var problems = problem.problems;
 				for (var i = 0; i < problems.length; i++)
@@ -5095,9 +5100,9 @@ function on(name, options, decoder)
 
 function equalEvents(a, b)
 {
-	if (!a.options === b.options)
+	if (a.options !== b.options)
 	{
-		if (a.stopPropagation !== b.stopPropagation || a.preventDefault !== b.preventDefault)
+		if (a.options.stopPropagation !== b.options.stopPropagation || a.options.preventDefault !== b.options.preventDefault)
 		{
 			return false;
 		}
@@ -6373,7 +6378,7 @@ function normalRenderer(parentNode, view)
 var rAF =
 	typeof requestAnimationFrame !== 'undefined'
 		? requestAnimationFrame
-		: function(callback) { callback(); };
+		: function(callback) { setTimeout(callback, 1000 / 60); };
 
 function makeStepper(domNode, view, initialVirtualNode, eventNode)
 {
@@ -7255,15 +7260,8 @@ function setupIncomingPort(name, callback)
 		sentBeforeInit.push(value);
 	}
 
-	function postInitSend(incomingValue)
+	function postInitSend(value)
 	{
-		var result = A2(_elm_lang$core$Json_Decode$decodeValue, converter, incomingValue);
-		if (result.ctor === 'Err')
-		{
-			throw new Error('Trying to send an unexpected type of value through port `' + name + '`:\n' + result._0);
-		}
-
-		var value = result._0;
 		var temp = subs;
 		while (temp.ctor !== '[]')
 		{
@@ -7274,7 +7272,13 @@ function setupIncomingPort(name, callback)
 
 	function send(incomingValue)
 	{
-		currentSend(incomingValue);
+		var result = A2(_elm_lang$core$Json_Decode$decodeValue, converter, incomingValue);
+		if (result.ctor === 'Err')
+		{
+			throw new Error('Trying to send an unexpected type of value through port `' + name + '`:\n' + result._0);
+		}
+
+		currentSend(result._0);
 	}
 
 	return { send: send };
@@ -11695,20 +11699,31 @@ var _elm_community$list_extra$List_Extra$dropWhile = F2(
 			}
 		}
 	});
-var _elm_community$list_extra$List_Extra$takeWhile = F2(
-	function (predicate, list) {
-		var _p68 = list;
-		if (_p68.ctor === '[]') {
-			return {ctor: '[]'};
-		} else {
-			var _p69 = _p68._0;
-			return predicate(_p69) ? {
-				ctor: '::',
-				_0: _p69,
-				_1: A2(_elm_community$list_extra$List_Extra$takeWhile, predicate, _p68._1)
-			} : {ctor: '[]'};
-		}
-	});
+var _elm_community$list_extra$List_Extra$takeWhile = function (predicate) {
+	var takeWhileMemo = F2(
+		function (memo, list) {
+			takeWhileMemo:
+			while (true) {
+				var _p68 = list;
+				if (_p68.ctor === '[]') {
+					return _elm_lang$core$List$reverse(memo);
+				} else {
+					var _p69 = _p68._0;
+					if (predicate(_p69)) {
+						var _v51 = {ctor: '::', _0: _p69, _1: memo},
+							_v52 = _p68._1;
+						memo = _v51;
+						list = _v52;
+						continue takeWhileMemo;
+					} else {
+						return _elm_lang$core$List$reverse(memo);
+					}
+				}
+			}
+		});
+	return takeWhileMemo(
+		{ctor: '[]'});
+};
 var _elm_community$list_extra$List_Extra$span = F2(
 	function (p, xs) {
 		return {
@@ -11827,12 +11842,12 @@ var _elm_community$list_extra$List_Extra$swapAt = F3(
 				return _elm_lang$core$Maybe$Just(l);
 			} else {
 				if (_elm_lang$core$Native_Utils.cmp(index1, index2) > 0) {
-					var _v57 = index2,
-						_v58 = index1,
-						_v59 = l;
-					index1 = _v57;
-					index2 = _v58;
-					l = _v59;
+					var _v59 = index2,
+						_v60 = index1,
+						_v61 = l;
+					index1 = _v59;
+					index2 = _v60;
+					l = _v61;
 					continue swapAt;
 				} else {
 					if (_elm_lang$core$Native_Utils.cmp(index1, 0) < 0) {
@@ -12533,7 +12548,7 @@ var _user$project$Algebra$Lattice = F4(
 	});
 var _user$project$Algebra$make_lattice = F4(
 	function (right, down, left, up) {
-		return (_elm_lang$core$Native_Utils.eq(
+		return (true && (_elm_lang$core$Native_Utils.eq(
 			A2(_user$project$Algebra_ops['***'], right, up),
 			A2(_user$project$Algebra_ops['***'], up, right)) && (_elm_lang$core$Native_Utils.eq(
 			A2(_user$project$Algebra_ops['***'], left, up),
@@ -12541,7 +12556,7 @@ var _user$project$Algebra$make_lattice = F4(
 			A2(_user$project$Algebra_ops['***'], right, down),
 			A2(_user$project$Algebra_ops['***'], down, right)) && _elm_lang$core$Native_Utils.eq(
 			A2(_user$project$Algebra_ops['***'], left, down),
-			A2(_user$project$Algebra_ops['***'], down, left))))) ? _elm_lang$core$Maybe$Just(
+			A2(_user$project$Algebra_ops['***'], down, left)))))) ? _elm_lang$core$Maybe$Just(
 			A4(_user$project$Algebra$Lattice, right, down, left, up)) : _elm_lang$core$Maybe$Nothing;
 	});
 var _user$project$Algebra$gen_lattice = function () {
@@ -12564,32 +12579,45 @@ var _user$project$Algebra$gen_lattice = function () {
 		},
 		A2(_elm_lang$core$Random$list, 4, _user$project$Algebra$gen_transform));
 }();
-var _user$project$Gomoku$colorOf = function (side) {
+var _user$project$Algebra$moebius = A4(_user$project$Algebra$Lattice, _user$project$Algebra$ident, _user$project$Algebra$flip_x, _user$project$Algebra$ident, _user$project$Algebra$flip_x);
+var _user$project$Algebra$vortex = A4(_user$project$Algebra$Lattice, _user$project$Algebra$rot_r, _user$project$Algebra$rot_l, _user$project$Algebra$rot_r, _user$project$Algebra$rot_l);
+var _user$project$Gomoku$color_of3 = function (side) {
 	var _p0 = side;
-	if (_p0.ctor === 'Black') {
+	switch (_p0.ctor) {
+		case 'Black3':
+			return _elm_lang$core$Color$black;
+		case 'White3':
+			return _elm_lang$core$Color$white;
+		default:
+			return _elm_lang$core$Color$blue;
+	}
+};
+var _user$project$Gomoku$color_of2 = function (side) {
+	var _p1 = side;
+	if (_p1.ctor === 'Black2') {
 		return _elm_lang$core$Color$black;
 	} else {
 		return _elm_lang$core$Color$white;
 	}
 };
 var _user$project$Gomoku$move = F2(
-	function (_p2, _p1) {
-		var _p3 = _p2;
-		var _p8 = _p3._1;
-		var _p7 = _p3._0;
-		var _p4 = _p1;
-		var _p6 = _p4.size;
-		var _p5 = _p4.moves;
+	function (_p3, _p2) {
+		var _p4 = _p3;
+		var _p9 = _p4._1;
+		var _p8 = _p4._0;
+		var _p5 = _p2;
+		var _p7 = _p5.size;
+		var _p6 = _p5.moves;
 		return ((!A2(
 			_elm_lang$core$List$member,
-			{ctor: '_Tuple2', _0: _p7, _1: _p8},
-			_p5)) && ((_elm_lang$core$Native_Utils.cmp(_p7, 0) > -1) && ((_elm_lang$core$Native_Utils.cmp(_p7, _p6) < 0) && ((_elm_lang$core$Native_Utils.cmp(_p8, 0) > -1) && (_elm_lang$core$Native_Utils.cmp(_p8, _p6) < 0))))) ? _elm_lang$core$Maybe$Just(
+			{ctor: '_Tuple2', _0: _p8, _1: _p9},
+			_p6)) && ((_elm_lang$core$Native_Utils.cmp(_p8, 0) > -1) && ((_elm_lang$core$Native_Utils.cmp(_p8, _p7) < 0) && ((_elm_lang$core$Native_Utils.cmp(_p9, 0) > -1) && (_elm_lang$core$Native_Utils.cmp(_p9, _p7) < 0))))) ? _elm_lang$core$Maybe$Just(
 			{
-				size: _p6,
+				size: _p7,
 				moves: {
 					ctor: '::',
-					_0: {ctor: '_Tuple2', _0: _p7, _1: _p8},
-					_1: _p5
+					_0: {ctor: '_Tuple2', _0: _p8, _1: _p9},
+					_1: _p6
 				}
 			}) : _elm_lang$core$Maybe$Nothing;
 	});
@@ -12597,25 +12625,57 @@ var _user$project$Gomoku$Board = F2(
 	function (a, b) {
 		return {size: a, moves: b};
 	});
-var _user$project$Gomoku$White = {ctor: 'White'};
-var _user$project$Gomoku$Black = {ctor: 'Black'};
-var _user$project$Gomoku$whose_turn = function (n) {
+var _user$project$Gomoku$Ops = F3(
+	function (a, b, c) {
+		return {whose_turn: a, other: b, color_of: c};
+	});
+var _user$project$Gomoku$White2 = {ctor: 'White2'};
+var _user$project$Gomoku$Black2 = {ctor: 'Black2'};
+var _user$project$Gomoku$whose_turn2 = function (n) {
 	return _elm_lang$core$Native_Utils.eq(
 		A2(_elm_lang$core$Basics_ops['%'], n, 2),
-		0) ? _user$project$Gomoku$Black : _user$project$Gomoku$White;
+		0) ? _user$project$Gomoku$Black2 : _user$project$Gomoku$White2;
 };
-var _user$project$Gomoku$other = function (side) {
-	var _p9 = side;
-	if (_p9.ctor === 'Black') {
-		return _user$project$Gomoku$White;
+var _user$project$Gomoku$other2 = function (side) {
+	var _p10 = side;
+	if (_p10.ctor === 'Black2') {
+		return _user$project$Gomoku$White2;
 	} else {
-		return _user$project$Gomoku$Black;
+		return _user$project$Gomoku$Black2;
 	}
 };
-var _user$project$Model$Model = F4(
-	function (a, b, c, d) {
-		return {selection: a, lattice: b, board: c, show_hints: d};
+var _user$project$Gomoku$ops2 = {whose_turn: _user$project$Gomoku$whose_turn2, other: _user$project$Gomoku$other2, color_of: _user$project$Gomoku$color_of2};
+var _user$project$Gomoku$Blue3 = {ctor: 'Blue3'};
+var _user$project$Gomoku$White3 = {ctor: 'White3'};
+var _user$project$Gomoku$Black3 = {ctor: 'Black3'};
+var _user$project$Gomoku$whose_turn3 = function (n) {
+	return _elm_lang$core$Native_Utils.eq(
+		A2(_elm_lang$core$Basics_ops['%'], n, 3),
+		0) ? _user$project$Gomoku$Black3 : (_elm_lang$core$Native_Utils.eq(
+		A2(_elm_lang$core$Basics_ops['%'], n, 3),
+		1) ? _user$project$Gomoku$White3 : _user$project$Gomoku$Blue3);
+};
+var _user$project$Gomoku$other3 = function (side) {
+	var _p11 = side;
+	switch (_p11.ctor) {
+		case 'Black3':
+			return _user$project$Gomoku$White3;
+		case 'White3':
+			return _user$project$Gomoku$Blue3;
+		default:
+			return _user$project$Gomoku$Black3;
+	}
+};
+var _user$project$Gomoku$ops3 = {whose_turn: _user$project$Gomoku$whose_turn3, other: _user$project$Gomoku$other3, color_of: _user$project$Gomoku$color_of3};
+var _user$project$Model$Model = F5(
+	function (a, b, c, d, e) {
+		return {selection: a, lattice: b, board: c, show_hints: d, num_players: e};
 	});
+var _user$project$Model$ThreePlayers = {ctor: 'ThreePlayers'};
+var _user$project$Model$TwoPlayers = {ctor: 'TwoPlayers'};
+var _user$project$Model$ChangeNumPlayers = function (a) {
+	return {ctor: 'ChangeNumPlayers', _0: a};
+};
 var _user$project$Model$ToggleHints = {ctor: 'ToggleHints'};
 var _user$project$Model$SetSize = function (a) {
 	return {ctor: 'SetSize', _0: a};
@@ -12714,30 +12774,14 @@ var _user$project$View$view_config = function (_p2) {
 		{ctor: '[]'},
 		{
 			ctor: '::',
-			_0: A2(
-				_elm_lang$html$Html$div,
+			_0: A3(
+				_elm_lang$html$Html$node,
+				'style',
 				{ctor: '[]'},
 				{
 					ctor: '::',
-					_0: _user$project$View$box(
-						{ctor: '[]'}),
-					_1: {
-						ctor: '::',
-						_0: A2(
-							_user$project$View$view_transform,
-							function (t) {
-								return _elm_lang$core$Native_Utils.update(
-									_p6,
-									{up: t});
-							},
-							_p4.up),
-						_1: {
-							ctor: '::',
-							_0: _user$project$View$box(
-								{ctor: '[]'}),
-							_1: {ctor: '[]'}
-						}
-					}
+					_0: _elm_lang$html$Html$text('html {font-family : sans;}'),
+					_1: {ctor: '[]'}
 				}),
 			_1: {
 				ctor: '::',
@@ -12746,28 +12790,37 @@ var _user$project$View$view_config = function (_p2) {
 					{ctor: '[]'},
 					{
 						ctor: '::',
-						_0: A2(
-							_user$project$View$view_transform,
-							function (t) {
-								return _elm_lang$core$Native_Utils.update(
-									_p6,
-									{left: t});
-							},
-							_p4.left),
+						_0: _elm_lang$html$Html$text('players '),
 						_1: {
 							ctor: '::',
-							_0: _user$project$View$box(
-								{ctor: '[]'}),
+							_0: A2(
+								_elm_lang$html$Html$button,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Events$onClick(
+										_user$project$Model$ChangeNumPlayers(_user$project$Model$TwoPlayers)),
+									_1: {ctor: '[]'}
+								},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text('2'),
+									_1: {ctor: '[]'}
+								}),
 							_1: {
 								ctor: '::',
 								_0: A2(
-									_user$project$View$view_transform,
-									function (t) {
-										return _elm_lang$core$Native_Utils.update(
-											_p6,
-											{right: t});
+									_elm_lang$html$Html$button,
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html_Events$onClick(
+											_user$project$Model$ChangeNumPlayers(_user$project$Model$ThreePlayers)),
+										_1: {ctor: '[]'}
 									},
-									_p4.right),
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text('3'),
+										_1: {ctor: '[]'}
+									}),
 								_1: {ctor: '[]'}
 							}
 						}
@@ -12775,30 +12828,9 @@ var _user$project$View$view_config = function (_p2) {
 				_1: {
 					ctor: '::',
 					_0: A2(
-						_elm_lang$html$Html$div,
+						_elm_lang$html$Html$br,
 						{ctor: '[]'},
-						{
-							ctor: '::',
-							_0: _user$project$View$box(
-								{ctor: '[]'}),
-							_1: {
-								ctor: '::',
-								_0: A2(
-									_user$project$View$view_transform,
-									function (t) {
-										return _elm_lang$core$Native_Utils.update(
-											_p6,
-											{down: t});
-									},
-									_p4.down),
-								_1: {
-									ctor: '::',
-									_0: _user$project$View$box(
-										{ctor: '[]'}),
-									_1: {ctor: '[]'}
-								}
-							}
-						}),
+						{ctor: '[]'}),
 					_1: {
 						ctor: '::',
 						_0: A2(
@@ -12806,19 +12838,55 @@ var _user$project$View$view_config = function (_p2) {
 							{ctor: '[]'},
 							{
 								ctor: '::',
-								_0: A2(
-									_elm_lang$html$Html$button,
-									{
+								_0: _elm_lang$html$Html$text('lattice '),
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$button,
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html_Events$onClick(
+												_user$project$Model$SetLattice(_user$project$Algebra$moebius)),
+											_1: {ctor: '[]'}
+										},
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html$text('moebius'),
+											_1: {ctor: '[]'}
+										}),
+									_1: {
 										ctor: '::',
-										_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$Randomize),
-										_1: {ctor: '[]'}
-									},
-									{
-										ctor: '::',
-										_0: _elm_lang$html$Html$text('randomize'),
-										_1: {ctor: '[]'}
-									}),
-								_1: {ctor: '[]'}
+										_0: A2(
+											_elm_lang$html$Html$button,
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html_Events$onClick(
+													_user$project$Model$SetLattice(_user$project$Algebra$vortex)),
+												_1: {ctor: '[]'}
+											},
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html$text('vortex'),
+												_1: {ctor: '[]'}
+											}),
+										_1: {
+											ctor: '::',
+											_0: A2(
+												_elm_lang$html$Html$button,
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$Randomize),
+													_1: {ctor: '[]'}
+												},
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html$text('random'),
+													_1: {ctor: '[]'}
+												}),
+											_1: {ctor: '[]'}
+										}
+									}
+								}
 							}),
 						_1: {
 							ctor: '::',
@@ -12827,95 +12895,213 @@ var _user$project$View$view_config = function (_p2) {
 								{ctor: '[]'},
 								{
 									ctor: '::',
-									_0: _elm_lang$html$Html$text('size: '),
+									_0: _user$project$View$box(
+										{ctor: '[]'}),
 									_1: {
 										ctor: '::',
 										_0: A2(
-											_elm_lang$html$Html$input,
-											{
+											_user$project$View$view_transform,
+											function (t) {
+												return _elm_lang$core$Native_Utils.update(
+													_p6,
+													{up: t});
+											},
+											_p4.up),
+										_1: {
+											ctor: '::',
+											_0: _user$project$View$box(
+												{ctor: '[]'}),
+											_1: {ctor: '[]'}
+										}
+									}
+								}),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$div,
+									{ctor: '[]'},
+									{
+										ctor: '::',
+										_0: A2(
+											_user$project$View$view_transform,
+											function (t) {
+												return _elm_lang$core$Native_Utils.update(
+													_p6,
+													{left: t});
+											},
+											_p4.left),
+										_1: {
+											ctor: '::',
+											_0: _user$project$View$box(
+												{ctor: '[]'}),
+											_1: {
 												ctor: '::',
-												_0: _elm_lang$html$Html_Events$onInput(
-													function (s) {
-														return _user$project$Model$SetSize(
-															A2(
-																_elm_lang$core$Result$withDefault,
-																_p5.size,
-																_elm_lang$core$String$toInt(s)));
-													}),
+												_0: A2(
+													_user$project$View$view_transform,
+													function (t) {
+														return _elm_lang$core$Native_Utils.update(
+															_p6,
+															{right: t});
+													},
+													_p4.right),
+												_1: {ctor: '[]'}
+											}
+										}
+									}),
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$div,
+										{ctor: '[]'},
+										{
+											ctor: '::',
+											_0: _user$project$View$box(
+												{ctor: '[]'}),
+											_1: {
+												ctor: '::',
+												_0: A2(
+													_user$project$View$view_transform,
+													function (t) {
+														return _elm_lang$core$Native_Utils.update(
+															_p6,
+															{down: t});
+													},
+													_p4.down),
 												_1: {
 													ctor: '::',
-													_0: _elm_lang$html$Html_Attributes$value(
-														_elm_lang$core$Basics$toString(_p5.size)),
-													_1: {
-														ctor: '::',
-														_0: _elm_lang$html$Html_Attributes$type_('number'),
-														_1: {
-															ctor: '::',
-															_0: A2(_elm_lang$html$Html_Attributes$attribute, 'min', '1'),
-															_1: {
-																ctor: '::',
-																_0: _elm_lang$html$Html_Attributes$style(
-																	{
-																		ctor: '::',
-																		_0: {ctor: '_Tuple2', _0: 'width', _1: '40px'},
-																		_1: {ctor: '[]'}
-																	}),
-																_1: {ctor: '[]'}
-															}
-														}
-													}
+													_0: _user$project$View$box(
+														{ctor: '[]'}),
+													_1: {ctor: '[]'}
 												}
-											},
+											}
+										}),
+									_1: {
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$br,
+											{ctor: '[]'},
 											{ctor: '[]'}),
 										_1: {
 											ctor: '::',
 											_0: A2(
-												_elm_lang$html$Html$button,
+												_elm_lang$html$Html$div,
+												{ctor: '[]'},
 												{
 													ctor: '::',
-													_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$Fill),
-													_1: {ctor: '[]'}
-												},
-												{
-													ctor: '::',
-													_0: _elm_lang$html$Html$text('fill'),
-													_1: {ctor: '[]'}
+													_0: _elm_lang$html$Html$text('size '),
+													_1: {
+														ctor: '::',
+														_0: A2(
+															_elm_lang$html$Html$input,
+															{
+																ctor: '::',
+																_0: _elm_lang$html$Html_Events$onInput(
+																	function (s) {
+																		return _user$project$Model$SetSize(
+																			A2(
+																				_elm_lang$core$Result$withDefault,
+																				_p5.size,
+																				_elm_lang$core$String$toInt(s)));
+																	}),
+																_1: {
+																	ctor: '::',
+																	_0: _elm_lang$html$Html_Attributes$value(
+																		_elm_lang$core$Basics$toString(_p5.size)),
+																	_1: {
+																		ctor: '::',
+																		_0: _elm_lang$html$Html_Attributes$type_('number'),
+																		_1: {
+																			ctor: '::',
+																			_0: A2(_elm_lang$html$Html_Attributes$attribute, 'min', '1'),
+																			_1: {
+																				ctor: '::',
+																				_0: _elm_lang$html$Html_Attributes$style(
+																					{
+																						ctor: '::',
+																						_0: {ctor: '_Tuple2', _0: 'width', _1: '40px'},
+																						_1: {ctor: '[]'}
+																					}),
+																				_1: {ctor: '[]'}
+																			}
+																		}
+																	}
+																}
+															},
+															{ctor: '[]'}),
+														_1: {ctor: '[]'}
+													}
 												}),
 											_1: {
 												ctor: '::',
 												_0: A2(
-													_elm_lang$html$Html$button,
-													{
-														ctor: '::',
-														_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$Clear),
-														_1: {ctor: '[]'}
-													},
-													{
-														ctor: '::',
-														_0: _elm_lang$html$Html$text('clear'),
-														_1: {ctor: '[]'}
-													}),
+													_elm_lang$html$Html$br,
+													{ctor: '[]'},
+													{ctor: '[]'}),
 												_1: {
 													ctor: '::',
 													_0: A2(
-														_elm_lang$html$Html$button,
+														_elm_lang$html$Html$div,
+														{ctor: '[]'},
 														{
 															ctor: '::',
-															_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$ToggleHints),
-															_1: {ctor: '[]'}
-														},
-														{
-															ctor: '::',
-															_0: _elm_lang$html$Html$text('hints'),
-															_1: {ctor: '[]'}
+															_0: A2(
+																_elm_lang$html$Html$button,
+																{
+																	ctor: '::',
+																	_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$Fill),
+																	_1: {ctor: '[]'}
+																},
+																{
+																	ctor: '::',
+																	_0: _elm_lang$html$Html$text('fill'),
+																	_1: {ctor: '[]'}
+																}),
+															_1: {
+																ctor: '::',
+																_0: A2(
+																	_elm_lang$html$Html$button,
+																	{
+																		ctor: '::',
+																		_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$Clear),
+																		_1: {ctor: '[]'}
+																	},
+																	{
+																		ctor: '::',
+																		_0: _elm_lang$html$Html$text('clear'),
+																		_1: {ctor: '[]'}
+																	}),
+																_1: {
+																	ctor: '::',
+																	_0: A2(
+																		_elm_lang$html$Html$button,
+																		{
+																			ctor: '::',
+																			_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$ToggleHints),
+																			_1: {ctor: '[]'}
+																		},
+																		{
+																			ctor: '::',
+																			_0: _elm_lang$html$Html$text('hints'),
+																			_1: {ctor: '[]'}
+																		}),
+																	_1: {ctor: '[]'}
+																}
+															}
 														}),
-													_1: {ctor: '[]'}
+													_1: {
+														ctor: '::',
+														_0: A2(
+															_elm_lang$html$Html$br,
+															{ctor: '[]'},
+															{ctor: '[]'}),
+														_1: {ctor: '[]'}
+													}
 												}
 											}
 										}
 									}
-								}),
-							_1: {ctor: '[]'}
+								}
+							}
 						}
 					}
 				}
@@ -13017,8 +13203,8 @@ var _user$project$View$view_hints = function (model) {
 			}
 		});
 };
-var _user$project$View$view_cell = F3(
-	function (selected, sideToPlay, cell) {
+var _user$project$View$view_cell = F4(
+	function (selected, ops, sideToPlay, cell) {
 		var end = _elm_lang$core$Basics$toFloat(_user$project$View$slot_pixels);
 		var mid = end / 2;
 		var dot = function (color) {
@@ -13083,7 +13269,7 @@ var _user$project$View$view_cell = F3(
 						selected ? {
 							ctor: '::',
 							_0: dot(
-								_user$project$Gomoku$colorOf(sideToPlay)),
+								ops.color_of(sideToPlay)),
 							_1: {ctor: '[]'}
 						} : {ctor: '[]'},
 						_elm_community$maybe_extra$Maybe_Extra$maybeToList(
@@ -13091,7 +13277,7 @@ var _user$project$View$view_cell = F3(
 								_elm_lang$core$Maybe$map,
 								function (c) {
 									return dot(
-										_user$project$Gomoku$colorOf(c));
+										ops.color_of(c));
 								},
 								cell))))));
 	});
@@ -13104,36 +13290,45 @@ var _user$project$View$view_board = function (model) {
 					return A2(
 						_elm_lang$core$List$map,
 						function (y) {
-							return A3(
-								_Kwarrtz$render$Graphics_Render$on,
-								'mousedown',
-								A3(_user$project$View$click, x, y, model),
-								A3(
+							var v = function (ops) {
+								return A3(
 									_Kwarrtz$render$Graphics_Render$on,
-									'mouseenter',
-									A3(_user$project$View$hover, x, y, model),
-									A2(
-										_Kwarrtz$render$Graphics_Render$position,
-										{
-											ctor: '_Tuple2',
-											_0: _elm_lang$core$Basics$toFloat(x * _user$project$View$slot_pixels),
-											_1: _elm_lang$core$Basics$toFloat(y * _user$project$View$slot_pixels)
-										},
-										A3(
-											_user$project$View$view_cell,
-											_elm_lang$core$Native_Utils.eq(
-												model.selection,
-												_elm_lang$core$Maybe$Just(
-													{ctor: '_Tuple2', _0: x, _1: y})),
-											_user$project$Gomoku$whose_turn(
-												_elm_lang$core$List$length(model.board.moves)),
-											A2(
-												_elm_lang$core$Maybe$map,
-												_user$project$Gomoku$whose_turn,
+									'mousedown',
+									A3(_user$project$View$click, x, y, model),
+									A3(
+										_Kwarrtz$render$Graphics_Render$on,
+										'mouseenter',
+										A3(_user$project$View$hover, x, y, model),
+										A2(
+											_Kwarrtz$render$Graphics_Render$position,
+											{
+												ctor: '_Tuple2',
+												_0: _elm_lang$core$Basics$toFloat(x * _user$project$View$slot_pixels),
+												_1: _elm_lang$core$Basics$toFloat(y * _user$project$View$slot_pixels)
+											},
+											A4(
+												_user$project$View$view_cell,
+												_elm_lang$core$Native_Utils.eq(
+													model.selection,
+													_elm_lang$core$Maybe$Just(
+														{ctor: '_Tuple2', _0: x, _1: y})),
+												ops,
+												ops.whose_turn(
+													_elm_lang$core$List$length(model.board.moves)),
 												A2(
-													_elm_community$list_extra$List_Extra$elemIndex,
-													{ctor: '_Tuple2', _0: x, _1: y},
-													_elm_lang$core$List$reverse(model.board.moves)))))));
+													_elm_lang$core$Maybe$map,
+													ops.whose_turn,
+													A2(
+														_elm_community$list_extra$List_Extra$elemIndex,
+														{ctor: '_Tuple2', _0: x, _1: y},
+														_elm_lang$core$List$reverse(model.board.moves)))))));
+							};
+							var _p8 = model.num_players;
+							if (_p8.ctor === 'TwoPlayers') {
+								return v(_user$project$Gomoku$ops2);
+							} else {
+								return v(_user$project$Gomoku$ops3);
+							}
 						},
 						A2(_elm_lang$core$List$range, 0, model.board.size - 1));
 				},
@@ -13142,8 +13337,8 @@ var _user$project$View$view_board = function (model) {
 var _user$project$View$view = function (model) {
 	var board_pixels = model.board.size * _user$project$View$slot_pixels;
 	var transform_html = F3(
-		function (_p8, xform, form) {
-			var _p9 = _p8;
+		function (_p9, xform, form) {
+			var _p10 = _p9;
 			return A2(
 				_elm_lang$html$Html$div,
 				{
@@ -13171,8 +13366,8 @@ var _user$project$View$view = function (model) {
 					ctor: '::',
 					_0: A5(
 						_Kwarrtz$render$Graphics_Render$svg,
-						_elm_lang$core$Basics$toFloat(_p9._0 * board_pixels),
-						_elm_lang$core$Basics$toFloat(_p9._1 * board_pixels),
+						_elm_lang$core$Basics$toFloat(_p10._0 * board_pixels),
+						_elm_lang$core$Basics$toFloat(_p10._1 * board_pixels),
 						_elm_lang$core$Basics$toFloat(board_pixels),
 						_elm_lang$core$Basics$toFloat(board_pixels),
 						form),
@@ -13249,12 +13444,13 @@ var _user$project$View$view = function (model) {
 };
 var _user$project$Main$init = {
 	selection: _elm_lang$core$Maybe$Nothing,
-	lattice: A4(_user$project$Algebra$Lattice, _user$project$Algebra$ident, _user$project$Algebra$ident, _user$project$Algebra$ident, _user$project$Algebra$ident),
+	lattice: A4(_user$project$Algebra$Lattice, _user$project$Algebra$rot_r, _user$project$Algebra$rot_l, _user$project$Algebra$rot_r, _user$project$Algebra$rot_l),
 	show_hints: false,
 	board: {
 		size: 7,
 		moves: {ctor: '[]'}
-	}
+	},
+	num_players: _user$project$Model$TwoPlayers
 };
 var _user$project$Main$random_moves = function (size) {
 	var gen_coord = A2(_elm_lang$core$Random$int, 0, size - 1);
@@ -13370,7 +13566,7 @@ var _user$project$Main$update = F2(
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
-			default:
+			case 'ToggleHints':
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
@@ -13378,11 +13574,19 @@ var _user$project$Main$update = F2(
 						{show_hints: !model.show_hints}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
+			default:
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{num_players: _p0._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
 		}
 	});
 var _user$project$Main$main = _elm_lang$html$Html$program(
 	{
-		init: {ctor: '_Tuple2', _0: _user$project$Main$init, _1: _user$project$Main$random_lattice},
+		init: {ctor: '_Tuple2', _0: _user$project$Main$init, _1: _elm_lang$core$Platform_Cmd$none},
 		view: _user$project$View$view,
 		update: _user$project$Main$update,
 		subscriptions: function (model) {
