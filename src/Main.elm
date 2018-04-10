@@ -1,10 +1,10 @@
 module Main exposing (..)
 
-import Html
-import Random
 import Algebra exposing (..)
 import Gomoku
+import Html
 import Model exposing (Model, Msg(..))
+import Random
 import View
 
 
@@ -19,7 +19,7 @@ random_moves size =
         gen_coord =
             Random.int 0 (size - 1)
     in
-        Random.generate RandomMoves (Random.pair gen_coord gen_coord)
+    Random.generate RandomMoves (Random.pair gen_coord gen_coord)
 
 
 init : Model
@@ -28,10 +28,10 @@ init =
     , lattice = Lattice rot_r rot_l rot_r rot_l
     , show_hints = False
     , board =
-        { size = 7
+        { sides = 2
+        , size = 7
         , moves = []
         }
-    , num_players = Model.TwoPlayers
     }
 
 
@@ -50,13 +50,21 @@ update msg model =
                     ( model, Cmd.none )
 
         Clear ->
-            ( { model | board = { moves = [], size = model.board.size } }, Cmd.none )
+            let
+                board =
+                    model.board
+            in
+            ( { model | board = { board | moves = [] } }, Cmd.none )
 
         Fill ->
             if List.length model.board.moves < model.board.size * model.board.size then
                 ( model, random_moves model.board.size )
             else
-                ( { model | board = { moves = [], size = model.board.size } }, random_moves model.board.size )
+                let
+                    board =
+                        model.board
+                in
+                ( { model | board = { board | moves = [] } }, random_moves model.board.size )
 
         RandomMoves ( x, y ) ->
             if List.length model.board.moves < model.board.size * model.board.size then
@@ -79,13 +87,21 @@ update msg model =
             ( { model | lattice = lattice }, Cmd.none )
 
         SetSize size ->
-            ( { model | board = { size = size, moves = model.board.moves } }, Cmd.none )
+            let
+                board =
+                    model.board
+            in
+            ( { model | board = { board | size = size } }, Cmd.none )
+
+        SetSides sides ->
+            let
+                board =
+                    model.board
+            in
+            ( { model | board = { board | sides = sides } }, Cmd.none )
 
         ToggleHints ->
             ( { model | show_hints = not model.show_hints }, Cmd.none )
-
-        ChangeNumPlayers num_players ->
-            ( { model | num_players = num_players }, Cmd.none )
 
 
 main : Program Never Model Msg

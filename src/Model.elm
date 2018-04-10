@@ -9,13 +9,7 @@ type alias Model =
     , lattice : Lattice
     , board : Board
     , show_hints : Bool
-    , num_players : NumPlayers
     }
-
-
-type NumPlayers
-    = TwoPlayers
-    | ThreePlayers
 
 
 type Msg
@@ -28,5 +22,5 @@ type Msg
     | RandomLattice Lattice
     | SetLattice Lattice
     | SetSize Int
+    | SetSides Int
     | ToggleHints
-    | ChangeNumPlayers NumPlayers

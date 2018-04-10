@@ -1,18 +1,19 @@
 module View exposing (view)
 
+import Algebra exposing (Lattice, Size, Transform, floatCoord, ident, moebius, show_transform, to3x3, transform, transforms, vortex)
 import Color exposing (..)
+import Gomoku exposing (Side, color_of, whose_turn)
 import Graphics.Render exposing (..)
-import Html exposing (Html, div, span, text, button)
-import Html.Attributes exposing (style, value, type_, attribute)
-import Html.Events exposing (onMouseEnter, onMouseLeave, onMouseDown, onInput)
+import Html exposing (Html, button, div, span, text)
+import Html.Attributes exposing (attribute, style, type_, value)
+import Html.Events exposing (onInput, onMouseDown, onMouseEnter, onMouseLeave)
 import Json.Decode as J
 import Kintail.InputWidget exposing (comboBox)
-import List exposing (range, map, concatMap, filter, member, length, reverse, concat, indexedMap, concatMap)
+import List exposing (concat, concatMap, filter, indexedMap, length, map, member, range, reverse)
 import List.Extra exposing ((!!), elemIndex)
-import Maybe.Extra exposing ((?), maybeToList, join)
-import Algebra exposing (Size, Transform, Lattice, to3x3, transform, transforms, show_transform, floatCoord, ident, moebius, vortex)
-import Gomoku exposing (ops2, ops3)
+import Maybe.Extra exposing ((?), join, maybeToList)
 import Model exposing (..)
+import Tuple2 exposing ((=>))
 
 
 slot_pixels : Int
@@ -28,12 +29,13 @@ view model =
 
         transform_html ( x, y ) xform form =
             div
-                [ style
-                    [ ( "display", "inline-block" )
-                    , ( "transform", "matrix" ++ toString xform )
-                    ]
-                ]
-                [ svg (toFloat (x * board_pixels)) (toFloat (y * board_pixels)) (toFloat board_pixels) (toFloat board_pixels) <|
+                [ style [ "display" => "inline-block", "transform" => ("matrix" ++ toString xform) ] ]
+                [ svg
+                    (toFloat (x * board_pixels))
+                    (toFloat (y * board_pixels))
+                    (toFloat board_pixels)
+                    (toFloat board_pixels)
+                  <|
                     form
                 ]
 
@@ -56,15 +58,12 @@ view model =
                     )
 
         style_ =
-            style
-                [ ( "line-height", "0" )
-                , ( "width", toString (3 * board_pixels) ++ "px" )
-                ]
+            style [ "line-height" => "0", "width" => (toString (3 * board_pixels) ++ "px") ]
     in
         div []
-            [ view_config model
-            , div [ onMouseLeave (Select Nothing), style_ ] <|
+            [ div [ onMouseLeave (Select Nothing), style_ ] <|
                 concat grid3x3
+            , view_config model
             ]
 
 
@@ -91,7 +90,7 @@ view_hints model =
 
 box : List (Html msg) -> Html msg
 box =
-    div [ style [ ( "display", "inline-block" ), ( "width", "60px" ) ] ]
+    div [ style [ "display" => "inline-block", "width" => "60px" ] ]
 
 
 view_transform : (Transform -> Lattice) -> Transform -> Html Msg
@@ -107,11 +106,33 @@ view_config { lattice, board } =
     case lattice of
         { right, down, left, up } ->
             div []
-                [ Html.node "style" [] [ Html.text "html {font-family : sans;}" ]
+                [ Html.node "style" [] [ Html.text "html {font-family : sans; background: #333; color: #ddd;}" ]
+                , Html.br [] []
+                , Html.br [] []
                 , div []
-                    [ Html.text "players "
-                    , button [ Html.Events.onClick (ChangeNumPlayers TwoPlayers) ] [ Html.text "2" ]
-                    , button [ Html.Events.onClick (ChangeNumPlayers ThreePlayers) ] [ Html.text "3" ]
+                    [ span []
+                        [ Html.text "players "
+                        , Html.input
+                            [ onInput (\s -> SetSides (String.toInt s |> Result.withDefault board.sides))
+                            , value (toString board.sides)
+                            , type_ "number"
+                            , attribute "min" "1"
+                            , style [ ( "width", "40px" ) ]
+                            ]
+                            []
+                        ]
+                    , span [] [ Html.text " " ]
+                    , span []
+                        [ Html.text "size "
+                        , Html.input
+                            [ onInput (\s -> SetSize (String.toInt s |> Result.withDefault board.size))
+                            , value (toString board.size)
+                            , type_ "number"
+                            , attribute "min" "1"
+                            , style [ ( "width", "40px" ) ]
+                            ]
+                            []
+                        ]
                     ]
                 , Html.br [] []
                 , div []
@@ -136,17 +157,6 @@ view_config { lattice, board } =
                     , box []
                     ]
                 , Html.br [] []
-                , div []
-                    [ Html.text "size "
-                    , Html.input
-                        [ onInput (\s -> SetSize (String.toInt s |> Result.withDefault board.size))
-                        , value (toString board.size)
-                        , type_ "number"
-                        , attribute "min" "1"
-                        , style [ ( "width", "40px" ) ]
-                        ]
-                        []
-                    ]
                 , Html.br [] []
                 , div []
                     [ button [ Html.Events.onClick Fill ] [ Html.text "fill" ]
@@ -159,34 +169,27 @@ view_config { lattice, board } =
 
 view_board : Model -> Form Msg
 view_board model =
-    group <|
-        concat <|
-            (range 0 (model.board.size - 1)
-                |> map
-                    (\x ->
-                        range 0 (model.board.size - 1)
-                            |> map
-                                (\y ->
-                                    let
-                                        v ops =
-                                            view_cell
-                                                (model.selection == Just ( x, y ))
-                                                ops
-                                                (ops.whose_turn (length model.board.moves))
-                                                (model.board.moves |> reverse |> elemIndex ( x, y ) |> Maybe.map ops.whose_turn)
-                                                |> position ( toFloat (x * slot_pixels), toFloat (y * slot_pixels) )
-                                                |> on "mouseenter" (hover x y model)
-                                                |> on "mousedown" (click x y model)
-                                    in
-                                        case model.num_players of
-                                            TwoPlayers ->
-                                                v ops2
-
-                                            ThreePlayers ->
-                                                v ops3
-                                )
-                    )
-            )
+    (group << concat) <|
+        (range 0 (model.board.size - 1)
+            |> map
+                (\x ->
+                    range 0 (model.board.size - 1)
+                        |> map
+                            (\y ->
+                                view_cell
+                                    (model.selection == Just ( x, y ))
+                                    (whose_turn model.board.sides (length model.board.moves))
+                                    (model.board.moves
+                                        |> reverse
+                                        |> elemIndex ( x, y )
+                                        |> Maybe.map (whose_turn model.board.sides)
+                                    )
+                                    |> position ( toFloat (x * slot_pixels), toFloat (y * slot_pixels) )
+                                    |> on "mouseenter" (hover x y model)
+                                    |> on "mousedown" (click x y model)
+                            )
+                )
+        )
 
 
 hover : Int -> Int -> Model -> J.Decoder Msg
@@ -205,8 +208,8 @@ click x y model =
         J.fail "occupied"
 
 
-view_cell : Bool -> Gomoku.Ops side -> side -> Maybe side -> Form Msg
-view_cell selected ops sideToPlay cell =
+view_cell : Bool -> Side -> Maybe Side -> Form Msg
+view_cell selected sideToPlay cell =
     let
         end =
             toFloat slot_pixels
@@ -230,11 +233,10 @@ view_cell selected ops sideToPlay cell =
                 |> filled (solid color)
                 |> opacity
                     (if selected then
-                        (if color == black then
+                        if color == black then
                             0.5
-                         else
+                        else
                             0.7
-                        )
                      else
                         1
                     )
@@ -244,8 +246,8 @@ view_cell selected ops sideToPlay cell =
             [ background ]
                 ++ cross
                 ++ (if selected then
-                        [ dot (ops.color_of sideToPlay) ]
+                        [ dot (color_of sideToPlay) ]
                     else
                         []
                    )
-                ++ (cell |> Maybe.map (\c -> dot (ops.color_of c)) |> maybeToList)
+                ++ (cell |> Maybe.map (\c -> dot (color_of c)) |> maybeToList)
